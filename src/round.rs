@@ -6,6 +6,7 @@ pub type Sequence = Vec<entity::Id>;
 pub type Initiative = i8;
 pub type TurnStates = HashMap<entity::Id, TurnStatus>;
 pub type Initiatives = HashMap<entity::Id, Initiative>;
+pub type TurnCounts = HashMap<entity::Id, u8>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TurnStatus {
