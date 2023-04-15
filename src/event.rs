@@ -2,6 +2,7 @@ use crate::scenario;
 use crate::player;
 use crate::entity;
 use crate::round;
+use crate::effect;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct State {
@@ -9,6 +10,7 @@ pub struct State {
     pub player: player::State,
     pub entity: entity::State,
     pub round: round::State,
+    pub effect: effect::State,
 }
 
 impl Default for State {
@@ -18,7 +20,7 @@ impl Default for State {
             player: player::State::default(),
             entity: entity::State::default(),
             round: round::State::default(),
-
+            effect: effect::State::default()
         }
     }
 }
@@ -121,7 +123,7 @@ impl Action {
             }
             Action::TiggerDelayedTurn(entity_id, triggering_entity_id) => {
                 Action::apply_all(vec![
-                    // Clear held action marker
+                    // Todo — Clear held action marker
                     Action::InterruptTurn(*triggering_entity_id),
                     Action::MoveTurnBefore(*entity_id, *triggering_entity_id),
                     Action::ActivateDelayedTurn(*entity_id, *triggering_entity_id),

@@ -1,8 +1,10 @@
+#![allow(dead_code)]
 mod event;
 mod scenario;
 mod player;
 mod entity;
 mod round;
+mod effect;
 
 // Consider that events have time stamps and game id to create hashes for IDs to make everything a pure function
 // but unique and DB storable
