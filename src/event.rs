@@ -74,7 +74,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn apply(&self, state: State) -> Result<State, ActionError> {
+    pub fn apply(self, state: State) -> Result<State, ActionError> {
         match self {
 
             // State and Actions
@@ -87,46 +87,46 @@ impl Action {
 
             // Player
             Action::AddPlayer(name) => player::add(state, name),
-            Action::RenamePlayer(player_id, player_name) => player::rename(state, *player_id, player_name),
+            Action::RenamePlayer(player_id, player_name) => player::rename(state, player_id, player_name),
             // @todo — Remove player needs to remove entities associated with it
-            Action::RemovePlayer(player_id) => player::remove(state, *player_id),
+            Action::RemovePlayer(player_id) => player::remove(state, player_id),
 
             // Entity
             Action::AddEntity(entity_name) => entity::add(state, entity_name),
-            Action::RenameEntity(entity_id, entity_name) => entity::rename(state, *entity_id, entity_name),
+            Action::RenameEntity(entity_id, entity_name) => entity::rename(state, entity_id, entity_name),
             // @todo — Remove entity needs to remove turns associated with it
-            Action::RemoveEntity(entity_id) => entity::remove(state, *entity_id),
+            Action::RemoveEntity(entity_id) => entity::remove(state, entity_id),
 
             // Round
-            Action::AddTurn(entity_id, initiative) => round::add_turn(state, *entity_id, *initiative),
+            Action::AddTurn(entity_id, initiative) => round::add_turn(state, entity_id, initiative),
             // @todo — Remove turn needs to remove effects associated with it that are
             //          flagged as bound to the entity life cycle (short lived)
-            Action::RemoveTurn(entity_id) => round::remove_turn(state, *entity_id),
+            Action::RemoveTurn(entity_id) => round::remove_turn(state, entity_id),
             Action::OrderTurnsByInitiative => round::order_turns_by_initiative(state),
-            Action::MoveTurn(entity_id, offset) => round::update_turn_order(state, *entity_id, *offset),
-            Action::MoveTurnBefore(entity_id, before_entity_id) => round::move_turn_before(state, *entity_id, *before_entity_id),
+            Action::MoveTurn(entity_id, offset) => round::update_turn_order(state, entity_id, offset),
+            Action::MoveTurnBefore(entity_id, before_entity_id) => round::move_turn_before(state, entity_id, before_entity_id),
 
             // Turn States/Status
-            Action::UpdateTurn(entity_id, turn_status) => round::update_turn_state(state, *entity_id, *turn_status),
-            Action::ResetTurn(entity_id) => round::update_turn_state(state, *entity_id, round::TurnStatus::Available),
-            Action::InterruptTurn(entity_id) => round::update_turn_state(state, *entity_id, round::TurnStatus::Paused),
-            Action::ResumeTurn(entity_id) => round::update_turn_state(state, *entity_id, round::TurnStatus::Active),
-            Action::ActivateTurn(entity_id) => round::update_turn_state(state, *entity_id, round::TurnStatus::Active),
-            Action::ActivateDelayedTurn(entity_id, triggering_entity_id) => round::activate_delayed_turn(state, *entity_id, *triggering_entity_id),
-            Action::CompleteTurn(entity_id) => round::update_turn_state(state, *entity_id, round::TurnStatus::Completed),
-            Action::SkipTurn(entity_id) => round::update_turn_state(state, *entity_id, round::TurnStatus::Skipped),
+            Action::UpdateTurn(entity_id, turn_status) => round::update_turn_state(state, entity_id, turn_status),
+            Action::ResetTurn(entity_id) => round::update_turn_state(state, entity_id, round::TurnStatus::Available),
+            Action::InterruptTurn(entity_id) => round::update_turn_state(state, entity_id, round::TurnStatus::Paused),
+            Action::ResumeTurn(entity_id) => round::update_turn_state(state, entity_id, round::TurnStatus::Active),
+            Action::ActivateTurn(entity_id) => round::update_turn_state(state, entity_id, round::TurnStatus::Active),
+            Action::ActivateDelayedTurn(entity_id, triggering_entity_id) => round::activate_delayed_turn(state, entity_id, triggering_entity_id),
+            Action::CompleteTurn(entity_id) => round::update_turn_state(state, entity_id, round::TurnStatus::Completed),
+            Action::SkipTurn(entity_id) => round::update_turn_state(state, entity_id, round::TurnStatus::Skipped),
             Action::DelayTurn(entity_id) => {
                 Action::apply_all(vec![
                     // Add held action marker
-                    Action::UpdateTurn(*entity_id, round::TurnStatus::Held(0))
+                    Action::UpdateTurn(entity_id, round::TurnStatus::Held(0))
                 ], state)
             }
             Action::TiggerDelayedTurn(entity_id, triggering_entity_id) => {
                 Action::apply_all(vec![
                     // Todo — Clear held action marker
-                    Action::InterruptTurn(*triggering_entity_id),
-                    Action::MoveTurnBefore(*entity_id, *triggering_entity_id),
-                    Action::ActivateDelayedTurn(*entity_id, *triggering_entity_id),
+                    Action::InterruptTurn(triggering_entity_id),
+                    Action::MoveTurnBefore(entity_id, triggering_entity_id),
+                    Action::ActivateDelayedTurn(entity_id, triggering_entity_id),
                 ], state)
             }
 
@@ -139,7 +139,7 @@ impl Action {
 
     pub fn apply_all(actions: Vec<Action>, state: State) -> Result<State, ActionError> {
         actions
-            .iter()
+            .into_iter()
             .fold(
                 Ok(state),
                 |state, action| {

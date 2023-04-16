@@ -15,18 +15,18 @@ impl Default for State {
     }
 }
 
-pub fn rename(state: event::State, name: &Name) -> event::ActionResult {
+pub fn rename(state: event::State, name: Name) -> event::ActionResult {
     if name.is_empty() {
         return Err("Can not rename to an empty name.".to_string());
     }
 
-    if state.scenario.name.eq(name) {
+    if state.scenario.name.eq(&name) {
         return Err("Can not rename to the same name.".to_string());
     }
     Ok(
         event::State {
             scenario: State {
-                name: name.to_string(),
+                name,
                 ..state.scenario
             },
             ..state

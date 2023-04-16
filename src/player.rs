@@ -23,7 +23,7 @@ impl Default for State {
 
 
 
-pub fn add(state: event::State, name: &Name) -> event::ActionResult {
+pub fn add(state: event::State, name: Name) -> event::ActionResult {
     if name.is_empty() {
         return Err("Player name can not be empty.".to_string());
     }
@@ -31,7 +31,7 @@ pub fn add(state: event::State, name: &Name) -> event::ActionResult {
     // If the player name is identical to another, add a number
     // and increase the number of the other one.
     let mut players = state.player.players;
-    players.insert(state.player.next_player_id, name.clone());
+    players.insert(state.player.next_player_id, name);
 
     Ok(event::State {
         player: State {
@@ -42,7 +42,7 @@ pub fn add(state: event::State, name: &Name) -> event::ActionResult {
     })
 }
 
-pub fn rename(state: event::State, player_id: Id, name: &Name) -> event::ActionResult {
+pub fn rename(state: event::State, player_id: Id, name: Name) -> event::ActionResult {
 
     let current_name = state.player.players.get(&player_id);
 
@@ -50,12 +50,12 @@ pub fn rename(state: event::State, player_id: Id, name: &Name) -> event::ActionR
         return Err("Unable to rename missing player.".to_string());
     }
 
-    if current_name == Some(name){
+    if current_name == Some(&name){
         return Err("Unable to rename player with unchanged name.".to_string());
     }
 
     let mut players = state.player.players;
-    players.insert(player_id, name.to_string() );
+    players.insert(player_id, name );
 
     Ok(event::State{
         player: State {

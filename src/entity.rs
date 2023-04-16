@@ -50,7 +50,7 @@ impl Default for State {
 }
 
 
-pub fn add(state: event::State, name: &Name) -> event::ActionResult {
+pub fn add(state: event::State, name: Name) -> event::ActionResult {
     if name.is_empty() {
         return Err("Entity name can not be empty.".to_string());
     }
@@ -59,7 +59,7 @@ pub fn add(state: event::State, name: &Name) -> event::ActionResult {
     let entity_id = state.entity.next_entity_id;
     entities.insert(
         entity_id,
-        Entity::new(name.to_string() ),
+        Entity::new(name),
     );
 
     Ok(event::State {
@@ -71,7 +71,7 @@ pub fn add(state: event::State, name: &Name) -> event::ActionResult {
     })
 }
 
-pub fn rename(state: event::State, entity_id: Id, new_name: &Name) -> event::ActionResult {
+pub fn rename(state: event::State, entity_id: Id, new_name: Name) -> event::ActionResult {
     let target_entity = state.entity.entities.get(&entity_id);
 
     if target_entity.is_none() {
@@ -80,13 +80,13 @@ pub fn rename(state: event::State, entity_id: Id, new_name: &Name) -> event::Act
 
     let target_entity = target_entity.unwrap();
 
-    if &target_entity.name == new_name {
+    if target_entity.name == new_name {
         return Err("Unable to rename entity with unchanged name.".to_string());
     }
 
     let updated_entity = Entity::set_name(
         &target_entity,
-        new_name.to_string()
+        new_name
     );
 
     let mut entities = state.entity.entities;
