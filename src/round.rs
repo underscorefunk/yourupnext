@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use crate::event;
 use crate::entity;
 
+pub type RoundCount = usize;
 pub type Sequence = Vec<entity::Id>;
 pub type Initiative = i8;
 pub type TurnStates = HashMap<entity::Id, TurnStatus>;
@@ -20,7 +21,7 @@ pub enum TurnStatus {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct State {
-    pub count: usize,
+    pub count: RoundCount,
     pub sequence: Sequence,
     pub turn_states: TurnStates,
     pub initiatives: Initiatives,
