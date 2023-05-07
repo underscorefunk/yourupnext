@@ -1,33 +1,28 @@
-use crate::scenario;
-use crate::player;
-use crate::entity;
-use crate::round;
-use crate::effect;
+pub mod entity;
+
+use crate::event;
+use entity::Collection;
+
+/// The effect system is an event driven generic data store
+/// that operates as an independent subsystem of the app.
+///
+/// Entities are registered with the effect system.
+
+pub type ActionError = event::ActionError;
+pub type ActionResult = Result<State, ActionError>;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct State {
-    pub scenario: scenario::State,
-    pub player: player::State,
-    pub entity: entity::State,
-    pub round: round::State,
-    pub effect: effect::State,
+    entities: Collection
 }
 
 impl Default for State {
     fn default() -> Self {
         Self {
-            scenario: scenario::State::default(),
-            player: player::State::default(),
-            entity: entity::State::default(),
-            round: round::State::default(),
-            effect: effect::State::default()
+            entities: Collection::default()
         }
     }
 }
-
-
-pub type ActionError = String;
-pub type ActionResult = Result<State, ActionError>;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Action {
@@ -36,17 +31,6 @@ pub enum Action {
 
     /// Initialize a state
     Init,
-
-    /// A grouping of actions that can be run as a set
-    Proc(Vec<Action>),
-
-    // Scenario
-    RenameScenario(scenario::Name),
-
-    // Player
-    AddPlayer(player::Name),
-    RenamePlayer(player::Id, player::Name),
-    RemovePlayer(player::Id),
 
     // Entity
     AddEntity(entity::Name),
@@ -71,25 +55,16 @@ pub enum Action {
     DelayTurn(entity::Id),
     TiggerDelayedTurn(entity::Id, usize),
     NextRound,
+
 }
 
-impl Action {
-    pub fn apply(self, state: State) -> Result<State, ActionError> {
-        match self {
 
-            // State and Actions
+impl Action {
+
+    pub fn apply(self, state: State) -> ActionResult {
+        match self {
             Action::None => Ok(state),
             Action::Init => Ok(State::default()),
-            Action::Proc(actions) => Self::apply_all(actions.clone(), state),
-
-            // Scenario
-            Action::RenameScenario(name) => scenario::rename(state, name),
-
-            // Player
-            Action::AddPlayer(name) => player::add(state, name),
-            Action::RenamePlayer(player_id, player_name) => player::rename(state, player_id, player_name),
-            // @todo — Remove player needs to remove entities associated with it
-            Action::RemovePlayer(player_id) => player::remove(state, player_id),
 
             // Entity
             Action::AddEntity(entity_name) => entity::add(state, entity_name),
@@ -134,10 +109,12 @@ impl Action {
             // Action::NextTurn => round::activate_next_turn(state),
             Action::NextRound => round::next_round(state),
             // Action::ActivateDelayedTurn(entity_id) => Ok(state)
+
+
         }
     }
 
-    pub fn apply_all(actions: Vec<Action>, state: State) -> Result<State, ActionError> {
+    pub fn apply_all(actions: Vec<Action>, state: State) -> ActionResult {
         actions
             .into_iter()
             .fold(

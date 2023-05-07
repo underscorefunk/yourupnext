@@ -1,18 +1,36 @@
 # Your Up Next
-An RPG application that lets you use as many or few rules as you want.
+An RPG application that lets you use as many or few rules or points of data as you want.
 
-It is build around the idea of:
+## Concepts
+- **Scenario:** This is your play session. It encompasses everything that happens through the 
+  course of play.
+- **Player:** A player is a participant in the scenario and has the ability to control characters, 
+  items they control, etc
+- **Entities:**
+  - Character: A player
+  - Item: TBD
+  - Location: TBD
+- **Turn:** Handles the sequence of play, ordering *CharacterTurns* and *RoundEvents*. 
+- **Effect:** Applies modifiers to entities, similar to a 'component' in an ECS.
 
-- Enities (things that can 'do') "People"
-- Locations (things that can be 'in' or 'at') "Places"
-- Objects (things that can be 'had') "Things"
+## Architecture
+The library uses an event sourcing approach.
 
-Only entities are in the initiative/turn order.
 
-Properties of these three distinct types are set by applying effects.
+An entity is just an ID
 
-At some point I'll need to figure out how to allow entities to also have location and object 
-qualities.
+Player (Entity)
+Character (Entity)
+Item (Entity)
+Location (Entity)
+Effect (Entity)
+
+Systems need to be names
+
+
+
+
+
 
 ## Reminders
 - [] Should start of round and end of round have timers to things that require resolution?
@@ -23,3 +41,15 @@ Pausing/holding and skipping should not be counted.
 - Use combat log and descriptive prompts to produce auto generated artwork for what's happening
 - Describe locations in english or rough draw maps with layers and have stable diffusion fill 
   in the tile sets
+
+
+// ---------
+// Consider that events have time stamps and game id to create hashes for IDs to make everything a pure function
+// but unique and DB storable
+
+// Some actions may require user input
+// We'll need to make action to open the request and another action to handle closing it
+// Triggering an IO being open should prevent anytihng other than an input cancel or input data
+// ----------------------------------------------------------------
+// Create events source list with undo and redo
+// ----------------------------------------------------------------

@@ -3,6 +3,8 @@ use crate::event;
 use crate::entity;
 use crate::round;
 
+/// The effect system allows us to register a component. The component can then have effects applied to it.
+///
 /// Effects are used to create a dynamic data model for entities.
 /// Everything that impacts a used "value" should be an effect.
 ///
@@ -27,6 +29,9 @@ use crate::round;
 ///
 /// A future refactor will convert "String" into a parsable string
 /// that can become a set of generic modifiers, values, etc
+///
+/// Guards required!!!
+/// - What if a player is removed from the initiative order. Their turn based things need to end
 
 pub type Id = usize;
 pub type Name = String;
@@ -63,36 +68,46 @@ impl Default for State {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-enum Source {
+pub enum Source {
     None,
-    Entity,
+    // Entity,
     // Location(String),
     // Object(String),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-enum Target {
+pub enum Target {
     None,
-    SelfEntity,
-    OtherEntity,
-    OtherEntities,
+    // SelfEntity,
+    // OtherEntity,
+    // OtherEntities,
     // Location(String),
     // Object(String),
 }
 
 // Duration may need to change to allow for "start of" and "end of"
 #[derive(Debug, Clone, Eq, PartialEq)]
-enum Duration {
+pub enum Duration {
     None,
-    UntilNextRound,
-    UpToNthRound(round::RoundCount), // ends at start of
-    ThroughNthRound(round::RoundCount), // ends at end of
-    Forever,
-    WhileSourceExists(entity::Id),
-    WhileTargetExists(entity::Id),
-    WhileSourceAndTargetExists(entity::Id, entity::Id),
+    // UntilNextRound,
+    //UpToNthRound(round::RoundCount),
+    // ends at start of
+    // ThroughNthRound(round::RoundCount),
+    // ends at end of
+    // Forever,
+    // WhileSourceExists(entity::Id),
+    // WhileTargetExists(entity::Id),
+    // WhileSourceAndTargetExists(entity::Id, entity::Id),
     // WhileHaveObject(String),
     // WhileAtLocation(String),
+}
+
+/// The effect system will need to be able to be updated in response to
+/// events that occur elsewhere. effect::Event enum allows us to list
+/// those
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Event {
+    // EntityRemoved
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -119,32 +134,35 @@ pub fn add(
     label: String,
 ) -> event::ActionResult {
     if verify_source(&state, &source).is_err() {
-        return Err("Unable to verify source".to_string);
+        return Err("Unable to verify source".to_string());
     }
 
     if verify_target(&state, &target).is_err() {
-        return Err("Unable to verify target".to_string);
+        return Err("Unable to verify target".to_string());
     }
 
     if label.is_empty() {
-        return Err("Effect label can not be empty".to_string);
+        return Err("Effect label can not be empty".to_string());
     }
 
-    let mut effects = state.effect.effects;
     let effect_id = state.effect.next_effect_id;
+    let next_effect_id = effect_id + 1;
+
+    // Insert the effect
+    let mut effects = state.effect.effects;
     effects.insert(
         effect_id,
-        Effect::new(
-            source,
-            target,
+        Effect{
             duration,
-            label,
-        ),
+            label
+        }
     );
+
+    // Create effect associations
 
     Ok(event::State {
         effect: State {
-            next_effect_id: effect_id + 1,
+            next_effect_id,
             effects,
             ..state.effect
         },
@@ -153,20 +171,36 @@ pub fn add(
 }
 
 fn verify_source(state: &event::State, source: &Source) -> Result<(), String> {
+    // Verify entity source
     todo!()
 }
 
 fn verify_target(state: &event::State, source: &Target) -> Result<(), String> {
+    // Verify entity target
     todo!()
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    /*
-        #[test]
-        fn add_effect_action_ok() {
-           todo!()
+
+    #[test]
+    fn add_effect_action_ok() {
+        let actions = vec![
+            event::Action::AddEntity("Jenna".to_string()),      // id 0
+            event::Action::AddTurn(0, 10),
+            event::Action::AddEffect( source::None, target::None, )
+        ];
+
+        let result = event::Action::apply_all(actions, event::State::default());
+
+        let sequence: Sequence = vec![1, 2, 0];
+
+        match result {
+            Ok(result) => {
+                assert_eq!(result.round.sequence, sequence);
+            }
+            Err(_) => assert!(false) // should always fail
         }
-        */
+    }
 }
