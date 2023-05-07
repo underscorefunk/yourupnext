@@ -5,6 +5,10 @@
 /// manage the one to many side of the relationship. Parents without children will be removed
 /// from the hierarchy. A single item can not exist in the hierarchy. A child without a parent will
 /// be removed and a parent without children will be removed.
+///
+/// Todo:
+/// - Parse linear set of relationships into a graph to find up or down stream components,
+/// cousins, etc. This might not totally be necessary early on though.
 
 use crate::prelude::*;
 
