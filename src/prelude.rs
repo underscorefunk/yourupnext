@@ -29,24 +29,23 @@ pub use crate::{
         Registry,
         Id,
         PubId,
+        register,
+        deregister
     },
-    hierarchy::{
-        Hierarchy
-    },
-    component,
+
+    structure::association::Association,
+    structure::hierarchy::Hierarchy,
+
     component::{
 
         // Collection types
         component::Component,
-        entity_assoc::EntityAssoc,
 
         // Components
-        entity_type,
         entity_type::{
             EntityType,
             classify,
         },
-        name,
         name::{
             Name,
             rename,

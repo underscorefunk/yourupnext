@@ -3,12 +3,12 @@ use crate::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct EntityAssoc {
+pub struct Association {
     pub id_dict: HashMap<Id, Id>,
     pub assoc_id_dict: HashMap<Id, Id>,
 }
 
-impl Default for EntityAssoc {
+impl Default for Association {
     fn default() -> Self {
         Self {
             id_dict: HashMap::default(),
@@ -17,7 +17,7 @@ impl Default for EntityAssoc {
     }
 }
 
-impl EntityAssoc {
+impl Association {
     pub fn assign(&mut self, id: Id, assoc_id: Id) -> ActionResult<()> {
         self.id_dict.insert(id, assoc_id);
         self.assoc_id_dict.insert(assoc_id, id);

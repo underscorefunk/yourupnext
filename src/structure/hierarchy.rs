@@ -44,7 +44,7 @@ impl Hierarchy {
     /// Count how many children (have a parent) exist in a Hierarchy
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     ///
     /// // ┌───┐   ┌───┐
     /// // │ 0 ├─┬▶│ 1 │
@@ -67,7 +67,7 @@ impl Hierarchy {
     /// Count how many children (have a parent) exist in a Hierarchy
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     ///
     /// // ┌───┐   ┌───┐
     /// // │ 0 ├─┬▶│ 1 │
@@ -90,7 +90,7 @@ impl Hierarchy {
     /// Check if an Id exists as a parent (has children) in a Hierarchy
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     ///
@@ -108,7 +108,7 @@ impl Hierarchy {
     /// Non-existent parents will return an empty vec.
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     /// let _ = h.set_parent(2, 0);
@@ -127,7 +127,7 @@ impl Hierarchy {
     /// Check if an Id exists as a child (has a parent) in a Hierarchy
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     ///
@@ -142,7 +142,7 @@ impl Hierarchy {
     /// Attempt to get a child's parent Id
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     ///
@@ -159,7 +159,7 @@ impl Hierarchy {
 
     /// Get parent Ids from furthest to closest
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     /// let _ = h.set_parent(2, 1);
@@ -187,7 +187,7 @@ impl Hierarchy {
 
     /// Get parent Ids from furthest to closest including the child
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     /// let _ = h.set_parent(2, 1);
@@ -208,7 +208,7 @@ impl Hierarchy {
     /// Remove a parent from a child
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     ///
     /// let mut h = Hierarchy::new();
     ///
@@ -275,7 +275,7 @@ impl Hierarchy {
     /// Establish hierarchical relationship by assigning a child to a parent
     ///
     /// ```
-    /// use yourupnext::hierarchy::Hierarchy;
+    /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
     /// let _ = h.set_parent(1, 0);
     ///
@@ -283,6 +283,7 @@ impl Hierarchy {
     /// assert!( ! h.is_parent(1) );
     /// ```
     pub fn set_parent(&mut self, child: Id, parent: Id) -> ActionResult<()> {
+        // If it exists, it needs to be unsed and then reset
         self.child_parent.insert(child, parent);
         self.set_child(parent, child)?;
         Ok(())

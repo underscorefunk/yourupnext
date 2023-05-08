@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[derive(Debug,Eq,PartialEq)]
 pub enum Cmd {
 
     // Player
@@ -9,7 +10,7 @@ pub enum Cmd {
 
     // Character
     AddCharacter(PubId, String),
-    // AssignCharacterPlayer(PubId, PubId),
+    AssignCharacterPlayer(PubId, PubId),
     RenameCharacter(PubId, String),
     RemoveCharacter(PubId),
 
@@ -45,7 +46,7 @@ impl Applicable<Cmd> for Cmd {
 
             // Character
             Cmd::AddCharacter(pub_id, name) => character::add(state, pub_id, name),
-            // Cmd::AssignCharacterPlayer(pub_id, player_pub_id) => character::assign_player(state, pub_id, player_pub_id),
+            Cmd::AssignCharacterPlayer(c_pub_id, p_pub_id) => character::assign_player(state, c_pub_id, p_pub_id),
             Cmd::RenameCharacter(pub_id, name) => character::rename(state, pub_id, name),
             Cmd::RemoveCharacter(pub_id) => character::remove(state, pub_id),
 

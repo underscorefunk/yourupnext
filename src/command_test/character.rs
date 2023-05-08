@@ -51,4 +51,6 @@ mod test {
         let id = state.registry.pub_dict.get(&1337);
         assert!(id.is_none());
     }
+
+
 }
