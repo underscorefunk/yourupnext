@@ -8,9 +8,9 @@ pub type PubId = usize;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Registry {
-    pub next_id: Id,
-    pub id_dict: HashMap<Id, PubId>,
-    pub pub_dict: HashMap<PubId, Id>,
+    next_id: Id,
+    id_dict: HashMap<Id, PubId>,
+    pub_dict: HashMap<PubId, Id>,
 }
 
 impl Default for Registry {

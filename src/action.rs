@@ -5,7 +5,9 @@ pub type ActionResult<ResultOk> = Result<ResultOk, ActionError>;
 
 pub trait Applicable<Action> {
     fn apply(self, state: State) -> ActionResult<State>;
+    fn apply_default(self) -> ActionResult<State>;
     fn apply_all(actions: Vec<Action>, state: State) -> ActionResult<State>;
+    fn apply_all_default(actions: Vec<Action>) -> ActionResult<State>;
 }
 
 pub fn apply_actions<Action: Applicable<Action>>
@@ -21,4 +23,10 @@ pub fn apply_actions<Action: Applicable<Action>>
                 }
             },
         )
+}
+
+
+pub trait ApplicableVec<Action: Applicable<Action>> {
+    fn apply(self, state: State) -> ActionResult<State>;
+    fn apply_default(self) -> ActionResult<State>;
 }

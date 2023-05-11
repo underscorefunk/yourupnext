@@ -56,8 +56,26 @@ impl Applicable<Action> for Action {
         }
     }
 
+    fn apply_default(self) -> ActionResult<State> {
+        self.apply( State::default() )
+    }
+
     fn apply_all(actions: Vec<Action>, state: State) -> ActionResult<State> {
         apply_actions(actions, state)
+    }
+
+    fn apply_all_default(actions: Vec<Action>) -> ActionResult<State> {
+        Self::apply_all(actions, State::default() )
+    }
+}
+
+impl ApplicableVec<Action> for Vec<Action> {
+    fn apply(self, state: State) -> ActionResult<State> {
+        Action::apply_all(self, state)
+    }
+
+    fn apply_default(self) -> ActionResult<State> {
+        Action::apply_all_default(self)
     }
 }
 

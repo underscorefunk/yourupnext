@@ -8,13 +8,14 @@ pub use crate::{
 
     command,
     command::{
-        Cmd
+        Cmd,
     },
 
     action::{
         ActionResult,
         ActionError,
         Applicable,
+        ApplicableVec,
         apply_actions,
     },
 
