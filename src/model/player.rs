@@ -4,10 +4,10 @@ pub fn add(state: State, pub_id: PubId, name: String) -> ActionResult<State> {
     let state = Action::RegisterEntity(pub_id).apply(state)?;
     let id = state.registry.id(&pub_id);
 
-    Action::apply_all(vec![
+    vec![
         Action::Classify(id, EntityType::Player),
         Action::Rename(id, name),
-    ], state)
+    ].apply(state)
 }
 
 pub fn rename(state: State, pub_id: PubId, name: String) -> ActionResult<State> {
@@ -17,7 +17,5 @@ pub fn rename(state: State, pub_id: PubId, name: String) -> ActionResult<State> 
 
 pub fn remove(state: State, pub_id: PubId) -> ActionResult<State> {
     let id = state.registry.id(&pub_id);
-    Action::apply_all(vec![
-        Action::DeleteEntity(id)
-    ], state)
+    Action::DeleteEntity(id).apply(state)
 }

@@ -8,21 +8,23 @@ pub fn add(state: State, character_pub_id: PubId, starting_name: String) -> Acti
     let state = Action::RegisterEntity(character_pub_id).apply(state)?;
     let id = state.registry.id(&character_pub_id);
 
-    Action::apply_all(vec![
+    vec![
         Action::Classify(id, EntityType::Character),
         Action::Rename(id, starting_name),
-    ], state)
+    ].apply(state)
 }
 
 /// COMMAND > Assign a character to a player
 /// ```
 /// use yourupnext::prelude::*;
-/// let commands = vec![
+/// let state = vec![
 ///     Cmd::AddPlayer(1,"APlayer".to_string()),
 ///     Cmd::AddCharacter(2,"ACharacter".to_string()),
 ///     Cmd::AssignCharacterPlayer(2,1)
-/// ];
-/// let state = Cmd::apply_all(commands, State::default() );
+/// ].apply_default().unwrap();
+///
+/// assert_eq!(character::player(&state,2), Some(1));
+///
 /// ```
 pub fn assign_player(mut state: State, character_pub_id: PubId, player_pub_id: PubId) -> ActionResult<State> {
     let character_id = state.registry.id(&character_pub_id);
@@ -75,12 +77,11 @@ pub fn remove(mut state: State, character_pub_id: PubId) -> ActionResult<State> 
 /// ```
 /// use yourupnext::prelude::*;
 ///
-/// let commands = vec![
+/// let state = vec![
 ///     Cmd::AddPlayer(1,"APlayer".to_string()),
 ///     Cmd::AddCharacter(2,"ACharacter".to_string()),
 ///     Cmd::AssignCharacterPlayer(2,1),
-/// ];
-/// let state = Cmd::apply_all(commands, State::default() ).unwrap();
+/// ].apply_default().unwrap();
 ///
 /// // PubId 1 refers to a player, its "player" id is None
 /// assert_eq!(character::player(&state,1), None);

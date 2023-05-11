@@ -15,8 +15,6 @@ pub use crate::{
         ActionResult,
         ActionError,
         Applicable,
-        ApplicableVec,
-        apply_actions,
     },
 
     model::{

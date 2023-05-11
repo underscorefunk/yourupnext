@@ -59,23 +59,5 @@ impl Applicable<Cmd> for Cmd {
         self.apply( State::default() )
     }
 
-    fn apply_all(actions: Vec<Cmd>, state: State) -> ActionResult<State> {
-        apply_actions(actions, state)
-    }
-
-    fn apply_all_default(actions: Vec<Cmd>) -> ActionResult<State> {
-        Self::apply_all(actions, State::default() )
-    }
-}
-
-
-impl ApplicableVec<Cmd> for Vec<Cmd> {
-    fn apply(self, state: State) -> ActionResult<State> {
-        Cmd::apply_all(self, state)
-    }
-
-    fn apply_default(self) -> ActionResult<State> {
-        Cmd::apply_all_default(self)
-    }
 }
 
