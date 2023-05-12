@@ -54,6 +54,7 @@ pub fn assign_player(mut state: State, character_pub_id: PubId, player_pub_id: P
 ///
 /// // PubId 1 refers to a player, its "player" id is None
 /// assert_eq!(character::player(&state,1), None);
+/// ```
 pub fn rename(state: State, character_pub_id: PubId, new_name: String) -> ActionResult<State> {
     let id = state.registry.id(&character_pub_id);
     Action::Rename(id, new_name).apply(state)
