@@ -35,7 +35,7 @@ pub enum Cmd {
 
 }
 
-impl Applicable<Cmd> for Cmd {
+impl Applicable for Cmd {
 
     fn apply(self, state: State) -> ActionResult<State> {
         match self {

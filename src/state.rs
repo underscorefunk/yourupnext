@@ -40,7 +40,7 @@ pub enum Action {
 
 }
 
-impl Applicable<Action> for Action {
+impl Applicable for Action {
     fn apply(self, state: State) -> ActionResult<State> {
         match self {
             Action::None => Ok(state),
