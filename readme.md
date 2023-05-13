@@ -1,6 +1,8 @@
 # Your Up Next
 An RPG application that lets you use as many or few rules or points of data as you want.
 
+
+
 ## Concepts
 - **Scenario:** This is your play session. It encompasses everything that happens through the 
   course of play.
@@ -28,7 +30,15 @@ Effect (Entity)
 Systems need to be names
 
 
-
+Code Style
+- Code documentation
+  - Bold Ideas **Command**, **Query**, etc
+  - Back tick structs, enums, nouns, and code references
+- Do not test functions that are just facades. Only test the lowest version on the strata
+- The prelude should expose common Traits, Structs, Enums. Functions should be namespaced as 
+modules to avoid variable name collisions.
+- Commands should be processed as pipelines to have errors bubble up
+- Queries are done as functions
 
 
 
@@ -42,6 +52,7 @@ Pausing/holding and skipping should not be counted.
 - Describe locations in english or rough draw maps with layers and have stable diffusion fill 
   in the tile sets
 
+- Create initiative groups for when the part is split
 
 // ---------
 // Consider that events have time stamps and game id to create hashes for IDs to make everything a pure function
@@ -53,3 +64,4 @@ Pausing/holding and skipping should not be counted.
 // ----------------------------------------------------------------
 // Create events source list with undo and redo
 // ----------------------------------------------------------------
+//

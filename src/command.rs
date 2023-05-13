@@ -37,7 +37,7 @@ pub enum Cmd {
 
 impl Applicable for Cmd {
 
-    fn apply(self, state: State) -> ActionResult<State> {
+    fn apply(self, state: State) -> CommandResult<State> {
         match self {
 
             // Player
@@ -55,7 +55,7 @@ impl Applicable for Cmd {
 
     }
 
-    fn apply_default(self) -> ActionResult<State> {
+    fn apply_default(self) -> CommandResult<State> {
         self.apply( State::default() )
     }
 

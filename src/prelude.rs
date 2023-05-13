@@ -3,7 +3,6 @@ pub use crate::{
     state,
     state::{
         State,
-        Action,
     },
 
     command,
@@ -12,13 +11,12 @@ pub use crate::{
     },
 
     action::{
-        ActionResult,
+        CommandResult,
         ActionError,
         Applicable,
     },
-
     model::{
-        scenario,
+        entity,
         player,
         character,
     },
@@ -28,8 +26,6 @@ pub use crate::{
         Registry,
         Id,
         PubId,
-        register,
-        deregister
     },
 
     structure::association::Association,
@@ -41,13 +37,14 @@ pub use crate::{
         component::Component,
 
         // Components
+        entity_type,
         entity_type::{
             EntityType,
             classify,
         },
+        name,
         name::{
-            Name,
-            rename,
+            Name
         },
     },
 

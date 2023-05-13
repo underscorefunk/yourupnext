@@ -44,7 +44,7 @@ impl Registry {
     }
 }
 
-pub fn register(mut state: State, pub_id: PubId) -> ActionResult<State> {
+pub fn register(mut state: State, pub_id: PubId) -> CommandResult<State> {
     if state.registry.has_pub_id(&pub_id) {
         return Err("Entity with PUBLIC ID already exists.".to_string());
     }
@@ -56,7 +56,7 @@ pub fn register(mut state: State, pub_id: PubId) -> ActionResult<State> {
     Ok(state)
 }
 
-pub fn deregister(mut state: State, id: Id) -> ActionResult<State> {
+pub fn deregister(mut state: State, id: Id) -> CommandResult<State> {
     if !state.registry.has_id(&id) {
         return Err("Unable to remove entitiy, missing ID.".to_string());
     }
@@ -74,45 +74,11 @@ pub fn deregister(mut state: State, id: Id) -> ActionResult<State> {
     Ok(state)
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
+// ----------------------------------------------------------------------
+// Query
+// ----------------------------------------------------------------------
 
-    #[test]
-    pub fn register_ok() {
-        let result = register(State::default(), 42);
-
-        if result.is_err() {
-            // This should always be ok
-            assert!(false);
-            return;
-        }
-
-        let state = result.unwrap();
-
-        assert_eq!(state.registry.next_id, 2);
-        assert!(state.registry.has_pub_id(&42));
-        assert_eq!(state.registry.id(&42), 1);
-    }
-
-    #[test]
-    pub fn remove_ok() {
-        let result = register(State::default(), 42);
-        if result.is_err() {
-            // This should always be ok
-            assert!(false);
-            return;
-        }
-        let state = result.unwrap();
-        let result = deregister(state, 1);
-        if result.is_err() {
-            // This should always be ok
-            assert!(false);
-            return;
-        }
-        let removed_state = result.unwrap();
-        assert_eq!(removed_state.registry.next_id, 2);
-        assert_eq!(removed_state.registry.has_pub_id(&42), false);
-        assert_eq!(removed_state.registry.id(&42), 0);
-    }
+/// QUERY > Get the Id for an entity via Public Id
+pub fn id(state: &State, pub_id: PubId) -> Id {
+    state.registry.id(&pub_id)
 }
