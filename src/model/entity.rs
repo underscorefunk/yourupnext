@@ -53,7 +53,7 @@ pub mod cmd {
     /// ```
     pub fn classify(state: State, entity_pub_id: PubId, entity_type: EntityType) -> CommandResult<State> {
         let entity_id = qry::id(&state, entity_pub_id);
-        entity_type::classify(state, entity_id, entity_type)
+        entity_type::cmd::classify(state, entity_id, entity_type)
     }
 
     /// COMMAND > Rename an entity
@@ -65,7 +65,7 @@ pub mod cmd {
     /// ```
     pub fn name(state: State, entity_pub_id: PubId, new_name: String) -> CommandResult<State> {
         let entity_id = qry::id(&state, entity_pub_id);
-        name::set(state, entity_id, new_name)
+        name::cmd::set(state, entity_id, new_name)
     }
 
 }
@@ -115,7 +115,7 @@ pub mod qry {
     /// ```
     pub fn kind(state: &State, entity_pub_id: Id) -> EntityType {
         let entity_id = id(state, entity_pub_id);
-        entity_type::get(state, entity_id)
+        entity_type::qry::get(state, entity_id)
     }
 
     /// QUERY > Check of an entity is of a specific type
@@ -134,7 +134,7 @@ pub mod qry {
     /// ```
     pub fn is(state: &State, entity_pub_id: Id, entity_type: EntityType) -> bool {
         let entity_id = id(state, entity_pub_id);
-        entity_type::is(state, entity_id, entity_type)
+        entity_type::qry::is(state, entity_id, entity_type)
     }
 
     /// QUERY > Get the Name of an entity or any empty string
@@ -150,6 +150,6 @@ pub mod qry {
     /// assert_eq!(entity::qry::name(&state, 100), "Named".to_string());
     /// ```
     pub fn name(state: &State, entity_pub_id: PubId) -> String {
-        name::get(state, entity_pub_id)
+        name::qry::get(state, entity_pub_id)
     }
 }

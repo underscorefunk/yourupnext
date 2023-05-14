@@ -40,7 +40,6 @@ pub use crate::{
         entity_type,
         entity_type::{
             EntityType,
-            classify,
         },
         name,
         name::{

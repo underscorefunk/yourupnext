@@ -2,22 +2,43 @@ use crate::prelude::*;
 
 pub type Name = String;
 
-// ----------------------------------------------------------------------
-// Command
-// ----------------------------------------------------------------------
+/// ## Name > Command (cmd)
 
-/// COMMAND > Set the `Name` of an entity
-pub fn set(mut state: State, id: Id, new_name: String) -> CommandResult<State> {
-    state.name.update(id, new_name)?;
-    Ok(state)
+pub mod cmd {
+    use super::*;
+
+    /// COMMAND > Set the `Name` of an entity
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default();
+    /// let state = entity::cmd::add( state, 100).unwrap();
+    /// let renamed_state = name::cmd::set( state, 100, "AName".to_string() ).unwrap();
+    /// assert_eq!(name::qry::get(&renamed_state,100), "AName".to_string() )
+    /// ```
+    pub fn set(mut state: State, entity_pub_id: PubId, new_name: String) -> CommandResult<State> {
+        let id = entity::qry::id( &state, entity_pub_id);
+        state.name.update(id, new_name)?;
+        Ok(state)
+    }
 }
 
-// ----------------------------------------------------------------------
-// Query
-// ----------------------------------------------------------------------
+/// ## Name > Query (qry)
 
-/// QUERY > Get the `Name` of an entity
-pub fn get(state: &State, character_pub_id: PubId) -> String {
-    let id = state.registry.id(&character_pub_id);
-    state.name.get(id).unwrap_or(String::new())
+pub mod qry {
+    use super::*;
+
+    /// QUERY > Get the `Name` of an entity
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default();
+    /// let state = entity::cmd::add( state, 100).unwrap();
+    /// let renamed_state = name::cmd::set( state, 100, "AName".to_string() ).unwrap();
+    /// assert_eq!(name::qry::get(&renamed_state,100), "AName".to_string() )
+    /// ```
+    pub fn get(state: &State, entity_pub_id: PubId) -> String {
+        let id = entity::qry::id( state, entity_pub_id);
+        state.name.get(id).unwrap_or(String::new())
+    }
 }

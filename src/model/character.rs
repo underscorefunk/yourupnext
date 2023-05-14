@@ -21,7 +21,7 @@ use crate::prelude::*;
 // assert_eq!(character::id(&state,100), 1)
 /// ```
 pub fn add(state: State, character_pub_id: PubId, starting_name: String) -> CommandResult<State> {
-    Err("todo".to_string())
+    Err("todo add".to_string())
     // let state = Action::RegisterEntity(character_pub_id).apply(state)?;
     // let id = registry::id(&state, character_pub_id);
     //
@@ -47,11 +47,11 @@ pub fn assign_player(mut state: State, character_pub_id: PubId, player_pub_id: P
     let character_id = entity::qry::id(&state, character_pub_id);
     let player_id = entity::qry::id(&state, player_pub_id);
 
-    if !entity_type::is(&state, character_id, EntityType::Character) {
+    if !entity_type::qry::is(&state, character_id, EntityType::Character) {
         return Err("Can not assign player to character when the target character isn't a Character entity type.".to_string());
     }
 
-    if !entity_type::is(&state, player_id, EntityType::Player) {
+    if !entity_type::qry::is(&state, player_id, EntityType::Player) {
         return Err("Can not assign player to character when the target player isn't a Player entity type.".to_string());
     }
 
@@ -114,7 +114,7 @@ pub fn exists(state: &State, character_pub_id: PubId) -> bool {
 /// assert!(! character::is_character(&state,102));
 /// ```
 pub fn is_character(state: &State, character_pub_id: Id) -> bool {
-    entity_type::is(
+    entity_type::qry::is(
         state,
         registry::id(state, character_pub_id),
         EntityType::Character,
@@ -189,5 +189,5 @@ pub fn player(state: &State, character_pub_id: PubId) -> Option<PubId> {
 /// assert_eq!(character::name(&state,2), String::new() );
 /// ```
 pub fn name(state: &State, character_pub_id: PubId) -> String {
-    name::get(state, character_pub_id)
+    name::qry::get(state, character_pub_id)
 }
