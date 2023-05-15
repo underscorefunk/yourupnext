@@ -1,47 +1,57 @@
+/// # Player Model
+
 use crate::prelude::*;
 
-/// Player Model
-///
-/// The player model includes COMMANDS and QUERIES to interact with data
-/// that is exclusively for players.
+/// ## Player > Command Applicables(Cmd)
+/// A simple wrapper for player commands so that they can be composed together with other pipelines.
+/// `Cmd` is a facade for `cmd` functions.
 
-// ----------------------------------------------------------------------
-// Command
-// ----------------------------------------------------------------------
-
-/// COMMAND > Add a player
-pub fn add(state: State, player_pub_id: PubId, starting_name: String) -> CommandResult<State> {
-    todo!()
-    /*
-    let state = Action::RegisterEntity(player_pub_id).apply(state)?;
-    let id = state.registry.id(&player_pub_id);
-
-    vec![
-        Action::Classify(id, EntityType::Player),
-        Action::Rename(id, starting_name),
-    ].apply(state)
-
-     */
+#[derive(Debug,Eq,PartialEq)]
+pub enum Player {
+    Add(PubId, Name),
+    Remove(PubId),
+    Rename(PubId, Name)
 }
 
-pub fn rename(state: State, pub_id: PubId, name: String) -> CommandResult<State> {
-    todo!()
-    // let id = state.registry.id(&pub_id);
-    // Action::Rename(id, name).apply(state)
+impl Applicable for Player {
+    fn apply_to(self, state: State) -> CmdResult<State> {
+        match self {
+            Player::Add(pub_id, starting_name) => cmd::add(state, pub_id, starting_name),
+            Player::Remove(pub_id) => cmd::remove(state, pub_id),
+            Player::Rename(pub_id, new_name) => cmd::rename(state, pub_id, new_name)
+        }
+    }
+    fn apply_to_default(self) -> CmdResult<State> {
+        self.apply_to( State::default() )
+    }
 }
 
-pub fn remove(state: State, pub_id: PubId) -> CommandResult<State> {
-    todo!()
-    // let id = state.registry.id(&pub_id);
-    // Action::DeleteEntity(id).apply(state)
+/// ## Player > Command (cmd)
+
+pub mod cmd {
+    use super::*;
+
+    /// COMMAND > Add a player
+    pub fn add(state: State, player_pub_id: PubId, starting_name: String) -> CmdResult<State> {
+        vec![
+            entity::Entity::Add(player_pub_id),
+            entity::Entity::Classify(player_pub_id, EntityType::Player),
+            entity::Entity::Name(player_pub_id, starting_name),
+        ].apply_to(state)
+    }
+
+    /// COMMAND > Remove a player
+    pub fn remove(state: State, player_pub_id: PubId) -> CmdResult<State> {
+        vec![
+            entity::Entity::Remove(player_pub_id),
+        ].apply_to(state)
+    }
+
+    /// COMMAND > Rename a player
+    pub fn rename(state: State, player_pub_id: PubId, new_name: String) -> CmdResult<State> {
+        vec![
+            entity::Entity::Name(player_pub_id, new_name),
+        ].apply_to(state)
+    }
+
 }
-
-// ----------------------------------------------------------------------
-// Query
-// ----------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------
-// Utility
-// ----------------------------------------------------------------------
-

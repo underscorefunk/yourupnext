@@ -37,7 +37,7 @@ impl Default for Round {
 }
 
 impl Round {
-    pub fn add_turn(&mut self, entity_id: Id, initiative: Initiative) -> CommandResult<()> {
+    pub fn add_turn(&mut self, entity_id: Id, initiative: Initiative) -> CmdResult<()> {
         if self.sequence.contains(&entity_id) {
             return Err("Unable to add entity turn. It already exists in the sequence of play.".to_string());
         }
@@ -49,7 +49,7 @@ impl Round {
         Ok(())
     }
 
-    pub fn remove_turn(&mut self, entity_id: Id) -> CommandResult<()> {
+    pub fn remove_turn(&mut self, entity_id: Id) -> CmdResult<()> {
         if !self.sequence.contains(&entity_id) {
             return Err("Unable to remove turn for entity that isn't in the round's sequence.".to_string());
         }
@@ -64,7 +64,7 @@ impl Round {
         Ok(())
     }
 
-    pub fn order_turns_by_initiative(&mut self) -> CommandResult<()> {
+    pub fn order_turns_by_initiative(&mut self) -> CmdResult<()> {
         if self.sequence.len() < 2 {
             return Err("Two or more items must be in the round sequence to allow for ordering by initiative.".to_string());
         }
@@ -85,7 +85,7 @@ impl Round {
         Ok(())
     }
 
-    pub fn update_turn_state(&mut self, entity_id: Id, turn_status: TurnStatus) -> CommandResult<()> {
+    pub fn update_turn_state(&mut self, entity_id: Id, turn_status: TurnStatus) -> CmdResult<()> {
         if !self.sequence.contains(&entity_id) {
             return Err("Can not update status of a turn that doesn't exist in the sequence.".to_string());
         }
@@ -95,7 +95,7 @@ impl Round {
         Ok(())
     }
 
-    pub fn next_round(&mut self) -> CommandResult<()> {
+    pub fn next_round(&mut self) -> CmdResult<()> {
         if self.turn_states.is_empty() {
             return Err("Can not proceed to next round. There are no turns in the sequence.".to_string());
         }
@@ -113,7 +113,7 @@ impl Round {
         Ok(())
     }
 
-    fn transition_next_round_turn_states(&mut self) -> CommandResult<()> {
+    fn transition_next_round_turn_states(&mut self) -> CmdResult<()> {
         self.turn_states.values = self.turn_states.values.clone().into_iter().map(
                 |(entity_id, turn_status)| {
                     let new_turn_status = match turn_status {
@@ -132,7 +132,7 @@ impl Round {
         &mut self,
         entity_id: Id,
         direction: i8,
-    ) -> CommandResult<()> {
+    ) -> CmdResult<()> {
         if direction == 0 {
             return Err("Can not reorder a turn that should move zero spots in the order.".to_string());
         }
@@ -164,7 +164,7 @@ impl Round {
         &mut self,
         entity_id_to_move: Id,
         before_entity_id: Id,
-    ) -> CommandResult<()> {
+    ) -> CmdResult<()> {
         if !self.sequence.contains(&entity_id_to_move) {
             return Err("Unable to move a nonexistant turn before another turn.".to_string());
         }
@@ -194,7 +194,7 @@ impl Round {
         &mut self,
         entity_id: Id,
         triggering_entity_id: Id,
-    ) -> CommandResult<()> {
+    ) -> CmdResult<()> {
         if !self.sequence.contains(&entity_id) {
             return Err("Can not activate nonexistant delayed turn.".to_string());
         }

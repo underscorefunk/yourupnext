@@ -18,7 +18,7 @@ impl Default for Association {
 }
 
 impl Association {
-    pub fn assign(&mut self, id: Id, assoc_id: Id) -> CommandResult<()> {
+    pub fn assign(&mut self, id: Id, assoc_id: Id) -> CmdResult<()> {
         self.id_dict.insert(id, assoc_id);
         self.assoc_id_dict.insert(assoc_id, id);
         Ok(())

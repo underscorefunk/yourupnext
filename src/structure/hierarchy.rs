@@ -257,7 +257,7 @@ impl Hierarchy {
     /// assert_eq!( h.children(0), vec![] );
     /// assert_eq!( h.lineage(4), vec![2,3,4] );
     /// ```
-    pub fn remove_parent(&mut self, child: Id) -> CommandResult<()> {
+    pub fn remove_parent(&mut self, child: Id) -> CmdResult<()> {
         if !self.is_child(child) {
             return Err("Unable to remove parent that was not set.".to_string());
         }
@@ -282,7 +282,7 @@ impl Hierarchy {
     /// assert!( h.is_parent(0) );
     /// assert!( ! h.is_parent(1) );
     /// ```
-    pub fn set_parent(&mut self, child: Id, parent: Id) -> CommandResult<()> {
+    pub fn set_parent(&mut self, child: Id, parent: Id) -> CmdResult<()> {
         // If it exists, it needs to be unsed and then reset
         self.child_parent.insert(child, parent);
         self.set_child(parent, child)?;
@@ -301,7 +301,7 @@ impl Hierarchy {
     // Private Command
     // ----------------------------------------------------------------------
 
-    fn set_child(&mut self, parent: Id, child: Id) -> CommandResult<()> {
+    fn set_child(&mut self, parent: Id, child: Id) -> CmdResult<()> {
         if !self.is_child(child) {
             return Err("Can not assign non-existent child to parent".to_string());
         }
@@ -324,7 +324,7 @@ impl Hierarchy {
         Ok(())
     }
 
-    fn remove_child(&mut self, parent: Id, child: Id) -> CommandResult<()> {
+    fn remove_child(&mut self, parent: Id, child: Id) -> CmdResult<()> {
         if !self.is_parent(parent) {
             return Err("Unable to remove children that aren't set".to_string());
         }

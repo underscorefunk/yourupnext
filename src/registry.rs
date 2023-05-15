@@ -44,7 +44,7 @@ impl Registry {
     }
 }
 
-pub fn register(mut state: State, pub_id: PubId) -> CommandResult<State> {
+pub fn register(mut state: State, pub_id: PubId) -> CmdResult<State> {
     if state.registry.has_pub_id(&pub_id) {
         return Err("Entity with PUBLIC ID already exists.".to_string());
     }
@@ -56,7 +56,7 @@ pub fn register(mut state: State, pub_id: PubId) -> CommandResult<State> {
     Ok(state)
 }
 
-pub fn deregister(mut state: State, id: Id) -> CommandResult<State> {
+pub fn deregister(mut state: State, id: Id) -> CmdResult<State> {
     if !state.registry.has_id(&id) {
         return Err("Unable to remove entitiy, missing ID.".to_string());
     }
@@ -81,4 +81,9 @@ pub fn deregister(mut state: State, id: Id) -> CommandResult<State> {
 /// QUERY > Get the Id for an entity via Public Id
 pub fn id(state: &State, pub_id: PubId) -> Id {
     state.registry.id(&pub_id)
+}
+
+/// QUERY > Get the PubId for an entity via Id
+pub fn pub_id(state: &State, id: Id) -> Option<PubId> {
+    state.registry.pub_id(&id)
 }

@@ -30,7 +30,7 @@ impl<CV: ComponentValue> Component<CV> {
         self.values.get(&id).cloned()
     }
 
-    pub fn insert(&mut self, id: Id, value: CV) -> CommandResult<()> {
+    pub fn insert(&mut self, id: Id, value: CV) -> CmdResult<()> {
         if self.is_set(id) {
             return Err("Can not insert component value that already exists. Use update.".to_string());
         }
@@ -38,12 +38,12 @@ impl<CV: ComponentValue> Component<CV> {
         Ok(())
     }
 
-    pub fn update(&mut self, id: Id, value: CV) -> CommandResult<()> {
+    pub fn update(&mut self, id: Id, value: CV) -> CmdResult<()> {
         self.values.insert(id, value);
         Ok(())
     }
 
-    pub fn delete(&mut self, id: Id) -> CommandResult<()> {
+    pub fn delete(&mut self, id: Id) -> CmdResult<()> {
         if !self.is_set(id) {
             return Err("Can not delete component that was never set".to_string());
         }

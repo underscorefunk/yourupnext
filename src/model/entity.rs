@@ -7,6 +7,33 @@
 /// the opportunity to filter name values in the context of characters.
 
 use crate::prelude::*;
+use crate::registry;
+
+/// ## Entity > Command Applicables (Cmd)
+/// A simple wrapper for entity commands so that they can be composed together with other pipelines.
+/// `Cmd` is a facade for `cmd` functions.
+
+#[derive(Debug,Eq,PartialEq)]
+pub enum Entity {
+    Add(PubId),
+    Remove(PubId),
+    Classify(PubId, EntityType),
+    Name(PubId, Name)
+}
+
+impl Applicable for Entity {
+    fn apply_to(self, state: State) -> CmdResult<State> {
+        match self {
+            Entity::Add(pub_id) => cmd::add(state, pub_id),
+            Entity::Remove(pub_id) => cmd::remove(state, pub_id),
+            Entity::Classify(pub_id, entity_type) => cmd::classify(state, pub_id, entity_type),
+            Entity::Name(pub_id, name) => cmd::name(state, pub_id, name)
+        }
+    }
+    fn apply_to_default(self) -> CmdResult<State> {
+        self.apply_to( State::default() )
+    }
+}
 
 /// ## Entity > Command (cmd)
 /// **Commands** allow us to changes to the `State` in the context of an entity's
@@ -28,18 +55,18 @@ pub mod cmd {
     ///     let state = entity::cmd::add( State::default(), 100).unwrap();
     ///     assert_eq!(entity::qry::id(&state,100), 1)
     /// ```
-    pub fn add(state: State, pub_id: PubId) -> CommandResult<State> {
+    pub fn add(state: State, pub_id: PubId) -> CmdResult<State> {
         registry::register(state, pub_id)
     }
 
     /// COMMAND > Remove an entity
     /// ```
     /// use yourupnext::prelude::*;
-    ///     let state = entity::cmd::add( State::default(), 100).unwrap();
-    ///     let removed_state = entity::cmd::remove( state, 100).unwrap();
-    ///     assert_eq!(entity::qry::id(&removed_state,100), 0)
+    /// let state = entity::cmd::add( State::default(), 100).unwrap();
+    /// let removed_state = entity::cmd::remove( state, 100).unwrap();
+    /// assert_eq!(entity::qry::id(&removed_state,100), 0)
     /// ```
-    pub fn remove(mut state: State, pub_id: PubId) -> CommandResult<State> {
+    pub fn remove(mut state: State, pub_id: PubId) -> CmdResult<State> {
         let id = qry::id(&state, pub_id);
         registry::deregister(state, id)
     }
@@ -47,13 +74,13 @@ pub mod cmd {
     /// COMMAND > Apply a classification (type) to an entity
     /// ```
     /// use yourupnext::prelude::*;
-    /// let state = entity::cmd::add( State::default(), 100).unwrap();
-    /// let classified_state = entity::cmd::classify( state, 100, EntityType::Player ).unwrap();
-    /// assert!(entity::qry::is(&classified_state,100, EntityType::Player));
+    /// let pub_id = 100;
+    /// let state = entity::cmd::add( State::default(), pub_id).unwrap();
+    /// let classified_state = entity::cmd::classify( state, pub_id, EntityType::Player ).unwrap();
+    /// assert!( entity::qry::is(&classified_state, pub_id, EntityType::Player) );
     /// ```
-    pub fn classify(state: State, entity_pub_id: PubId, entity_type: EntityType) -> CommandResult<State> {
-        let entity_id = qry::id(&state, entity_pub_id);
-        entity_type::cmd::classify(state, entity_id, entity_type)
+    pub fn classify(state: State, entity_pub_id: PubId, entity_type: EntityType) -> CmdResult<State> {
+        entity_type::cmd::classify(state, entity_pub_id, entity_type)
     }
 
     /// COMMAND > Rename an entity
@@ -63,9 +90,8 @@ pub mod cmd {
     /// let renamed_state = entity::cmd::name( state, 100, "AName".to_string() ).unwrap();
     /// assert_eq!(entity::qry::name(&renamed_state,100), "AName".to_string() )
     /// ```
-    pub fn name(state: State, entity_pub_id: PubId, new_name: String) -> CommandResult<State> {
-        let entity_id = qry::id(&state, entity_pub_id);
-        name::cmd::set(state, entity_id, new_name)
+    pub fn name(state: State, entity_pub_id: PubId, new_name: String) -> CmdResult<State> {
+        name::cmd::set(state, entity_pub_id, new_name)
     }
 
 }
@@ -99,6 +125,11 @@ pub mod qry {
         registry::id(state, entity_pub_id)
     }
 
+    /// Query > Get the Pub Id of an entity given its Id
+    pub fn pub_id(state: &State, entity_id: Id) -> Option<PubId> {
+        registry::pub_id(state, entity_id)
+    }
+
     /// QUERY > Check of an entity is of a specific type
     /// ```
     /// use yourupnext::prelude::*;
@@ -113,9 +144,8 @@ pub mod qry {
     /// assert_eq!(entity::qry::kind(&state,100), EntityType::Player);
     ///
     /// ```
-    pub fn kind(state: &State, entity_pub_id: Id) -> EntityType {
-        let entity_id = id(state, entity_pub_id);
-        entity_type::qry::get(state, entity_id)
+    pub fn kind(state: &State, entity_pub_id: PubId) -> EntityType {
+        entity_type::qry::get(state, entity_pub_id)
     }
 
     /// QUERY > Check of an entity is of a specific type
@@ -133,8 +163,7 @@ pub mod qry {
     ///
     /// ```
     pub fn is(state: &State, entity_pub_id: Id, entity_type: EntityType) -> bool {
-        let entity_id = id(state, entity_pub_id);
-        entity_type::qry::is(state, entity_id, entity_type)
+        entity_type::qry::is(state, entity_pub_id, entity_type)
     }
 
     /// QUERY > Get the Name of an entity or any empty string

@@ -1,62 +1,44 @@
 use crate::prelude::*;
 
+/// The point of the top level Cmd module is so that all commands can be mixed and matched
+/// providing a composable API for enacting state changes.
+
 #[derive(Debug,Eq,PartialEq)]
 pub enum Cmd {
-
-    // Player
-    AddPlayer(PubId, String),
-    RenamePlayer(PubId, String),
-    RemovePlayer(PubId),
-
-    // Character
-    AddCharacter(PubId, String),
-    AssignCharacterPlayer(PubId, PubId),
-    RenameCharacter(PubId, String),
-    RemoveCharacter(PubId),
-
-    // Subsys Round
-    // AddTurn(PubId, Initiative),
-    // RemoveTurn(PubId),
-    // OrderTurnsByInitiative,
-    // UpdateTurn(PubId, TurnStatus),
-    // MoveTurn(PubId, i8),
-    // MoveTurnBefore(PubId, PubId),
-    //
-    // ResetTurn(PubId),
-    // ActivateTurn(PubId),
-    // InterruptTurn(PubId),
-    // ActivateDelayedTurn(PubId, PubId),
-    // ResumeTurn(PubId),
-    // CompleteTurn(PubId),
-    // SkipTurn(PubId),
-    // DelayTurn(PubId),
-    // TiggerDelayedTurn(PubId, usize),
-    // NextRound,
-
+    Set(Vec<Cmd>),
+    Player(Player),
+    Entity(Entity),
+    Character(Character),
 }
 
 impl Applicable for Cmd {
 
-    fn apply(self, state: State) -> CommandResult<State> {
+    fn apply_to(self, state: State) -> CmdResult<State> {
         match self {
 
-            // Player
-            Cmd::AddPlayer(pub_id, name) => player::add(state, pub_id, name),
-            Cmd::RenamePlayer(pub_id, name) => player::rename(state, pub_id, name),
-            Cmd::RemovePlayer(pub_id) => player::remove(state, pub_id),
+            Cmd::Set( cmd_set ) => cmd_set.apply_to(state),
 
-            // Character
-            Cmd::AddCharacter(pub_id, name) => character::add(state, pub_id, name),
-            Cmd::AssignCharacterPlayer(c_pub_id, p_pub_id) => character::assign_player(state, c_pub_id, p_pub_id),
-            Cmd::RenameCharacter(pub_id, name) => character::rename(state, pub_id, name),
-            Cmd::RemoveCharacter(pub_id) => character::remove(state, pub_id),
+            Cmd::Entity( cmd ) => cmd.apply_to(state),
+            Cmd::Player( cmd ) => cmd.apply_to(state),
+            Cmd::Character( cmd ) => cmd.apply_to(state)
+
+            // Player
+            // Cmd::AddPlayer(pub_id, name) => player::Cmd::Add( pub_id, name).apply_to(state),
+            // Cmd::RenamePlayer(pub_id, name) => player::rename(state, pub_id, name),
+            // Cmd::RemovePlayer(pub_id) => player::remove(state, pub_id),
+            //
+            // // Character
+            // Cmd::AddCharacter(pub_id, name) => character::add(state, pub_id, name),
+            // Cmd::AssignCharacterPlayer(c_pub_id, p_pub_id) => character::assign_player(state, c_pub_id, p_pub_id),
+            // Cmd::RenameCharacter(pub_id, name) => character::rename(state, pub_id, name),
+            // Cmd::RemoveCharacter(pub_id) => character::remove(state, pub_id),
 
         }
 
     }
 
-    fn apply_default(self) -> CommandResult<State> {
-        self.apply( State::default() )
+    fn apply_to_default(self) -> CmdResult<State> {
+        self.apply_to( State::default() )
     }
 
 }

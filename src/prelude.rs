@@ -10,20 +10,21 @@ pub use crate::{
         Cmd,
     },
 
-    action::{
-        CommandResult,
-        ActionError,
+    applicable::{
+        CmdResult,
+        CmdErr,
         Applicable,
     },
     model::{
         entity,
+        entity::Entity,
         player,
+        player::Player,
         character,
+        character::Character,
     },
 
-    registry,
     registry::{
-        Registry,
         Id,
         PubId,
     },
