@@ -3,13 +3,10 @@ use crate::registry::Registry;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct State {
-
     pub registry: Registry,
-
     pub entity_type: Component<EntityType>,
     pub name: Component<String>,
     pub character_player: Hierarchy,
-
     pub round: Round,
 }
 

@@ -14,6 +14,7 @@ pub use crate::{
         CmdResult,
         CmdErr,
         Applicable,
+        ApplicableChainable
     },
     model::{
         entity,
