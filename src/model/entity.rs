@@ -18,7 +18,7 @@ pub enum Entity {
     Add(PubId),
     Remove(PubId),
     Classify(PubId, EntityType),
-    Name(PubId, Name)
+    Name(PubId, &'static Name)
 }
 
 impl Applicable for Entity {
@@ -90,7 +90,7 @@ pub mod cmd {
     /// let renamed_state = entity::cmd::name( state, 100, "AName".to_string() ).unwrap();
     /// assert_eq!(entity::qry::name(&renamed_state,100), "AName".to_string() )
     /// ```
-    pub fn name(state: State, entity_pub_id: PubId, new_name: String) -> CmdResult<State> {
+    pub fn name(state: State, entity_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
         name::cmd::set(state, entity_pub_id, new_name)
     }
 

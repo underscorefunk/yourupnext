@@ -8,9 +8,9 @@ use crate::prelude::*;
 
 #[derive(Debug,Eq,PartialEq)]
 pub enum Player {
-    Add(PubId, Name),
+    Add(PubId, &'static Name),
     Remove(PubId),
-    Rename(PubId, Name)
+    Rename(PubId, &'static Name)
 }
 
 impl Applicable for Player {
@@ -32,26 +32,76 @@ pub mod cmd {
     use super::*;
 
     /// COMMAND > Add a player
-    pub fn add(state: State, player_pub_id: PubId, starting_name: String) -> CmdResult<State> {
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let pub_id: PubId = 100;
+    /// let state = Player::Add(pub_id,"APlayer")
+    ///     .apply_to_default()
+    ///     .unwrap();
+    ///
+    /// assert!(player::qry::exists(&state,pub_id));
+    /// assert_eq!(player::qry::name(&state,pub_id), "APlayer");
+    ///
+    /// ```
+    pub fn add(state: State, player_pub_id: PubId, starting_name: &'static Name) -> CmdResult<State> {
         vec![
-            entity::Entity::Add(player_pub_id),
-            entity::Entity::Classify(player_pub_id, EntityType::Player),
-            entity::Entity::Name(player_pub_id, starting_name),
+            Entity::Add(player_pub_id),
+            Entity::Classify(player_pub_id, EntityType::Player),
+            Entity::Name(player_pub_id, starting_name),
         ].apply_to(state)
     }
 
     /// COMMAND > Remove a player
+    /// See Entity::Remove for tests
     pub fn remove(state: State, player_pub_id: PubId) -> CmdResult<State> {
-        vec![
-            entity::Entity::Remove(player_pub_id),
-        ].apply_to(state)
+        Entity::Remove(player_pub_id).apply_to(state)
     }
 
     /// COMMAND > Rename a player
-    pub fn rename(state: State, player_pub_id: PubId, new_name: String) -> CmdResult<State> {
-        vec![
-            entity::Entity::Name(player_pub_id, new_name),
-        ].apply_to(state)
+    /// See Entity::Name for tests
+    pub fn rename(state: State, player_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
+        Entity::Name(player_pub_id, new_name).apply_to(state)
     }
 
+}
+
+/// ## Character > Query (qry)
+
+pub mod qry {
+    use super::*;
+
+    /// QUERY > Check if a player exists
+    /// See `entity_type` component for tests
+    pub fn exists(state: &State, player_pub_id: PubId) -> bool {
+        entity_type::qry::is(state, player_pub_id, EntityType::Player)
+    }
+
+    /// QUERY > Get a player's `Id`
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let pub_id: PubId = 100;
+    /// let state = Player::Add(pub_id,"APlayer")
+    ///     .apply_to_default()
+    ///     .unwrap();
+    ///
+    /// assert_eq!(player::qry::id(&state, pub_id), 1);
+    ///
+    /// let nonexistant_pub_id: PubId = 200;
+    /// assert_eq!(player::qry::id(&state, nonexistant_pub_id), 0);
+    ///
+    /// ```
+    pub fn id(state: &State, player_pub_id: PubId) -> Id {
+        match exists(state, player_pub_id) {
+            true => entity::qry::id(state, player_pub_id),
+            false => 0
+        }
+    }
+
+    /// QUERY > Get a player's `name` as String
+    /// See `name` component for tests
+    pub fn name(state: &State, player_pub_id: PubId) -> String {
+        name::qry::get(state, player_pub_id)
+    }
 }

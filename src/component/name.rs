@@ -2,13 +2,13 @@
 
 use crate::prelude::*;
 
-pub type Name = String;
+pub type Name = str;
 
 /// ## Name > Command Applicables (Cmd)
 /// A simple wrapper for entity commands so that they can be composed together with other pipelines.
 /// `Cmd` is a facade for `cmd` functions.
 pub enum Cmd {
-    Set(PubId, Name),
+    Set(PubId, &'static Name),
 }
 
 impl Applicable for Cmd {
@@ -31,13 +31,13 @@ pub mod cmd {
     /// ```
     /// use yourupnext::prelude::*;
     ///
-    /// let state = entity::Entity::Add( 100).apply_to_default().unwrap();
-    /// let renamed_state = name::Cmd::Set( 100, "AName".to_string() ).apply_to(state).unwrap();
-    /// assert_eq!(name::qry::get(&renamed_state,100), "AName".to_string() )
+    /// let state = Entity::Add(100).apply_to_default().unwrap();
+    /// let renamed_state = name::Cmd::Set( 100, "AName").apply_to(state).unwrap();
+    /// assert_eq!(name::qry::get(&renamed_state,100), "AName")
     /// ```
-    pub fn set(mut state: State, entity_pub_id: PubId, new_name: String) -> CmdResult<State> {
+    pub fn set(mut state: State, entity_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
         let id = entity::qry::id( &state, entity_pub_id);
-        state.name.update(id, new_name)?;
+        state.name.update(id, new_name.to_string())?;
         Ok(state)
     }
 }
@@ -51,13 +51,13 @@ pub mod qry {
     /// ```
     /// use yourupnext::prelude::*;
     ///
-    /// let state = entity::Entity::Add(100).apply_to_default().unwrap();
-    /// let state = name::Cmd::Set(100, "AName".to_string()).apply_to(state).unwrap();
+    /// let state = Entity::Add(100).apply_to_default().unwrap();
+    /// let state = name::Cmd::Set(100, "AName").apply_to(state).unwrap();
     ///
     /// assert_eq!(name::qry::get(&state,100), "AName".to_string() )
     /// ```
     pub fn get(state: &State, entity_pub_id: PubId) -> String {
         let id = entity::qry::id( state, entity_pub_id);
-        state.name.get(id).unwrap_or(String::new())
+        state.name.get(id).unwrap_or_default()
     }
 }

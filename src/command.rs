@@ -6,9 +6,9 @@ use crate::prelude::*;
 #[derive(Debug,Eq,PartialEq)]
 pub enum Cmd {
     Set(Vec<Cmd>),
-    Player(Player),
+    // Player(Player),
     Entity(Entity),
-    Character(Character),
+    // Character(Character),
 }
 
 impl Applicable for Cmd {
@@ -19,8 +19,8 @@ impl Applicable for Cmd {
             Cmd::Set( cmd_set ) => cmd_set.apply_to(state),
 
             Cmd::Entity( cmd ) => cmd.apply_to(state),
-            Cmd::Player( cmd ) => cmd.apply_to(state),
-            Cmd::Character( cmd ) => cmd.apply_to(state)
+            // Cmd::Player( cmd ) => cmd.apply_to(state),
+            // Cmd::Character( cmd ) => cmd.apply_to(state)
 
             // Player
             // Cmd::AddPlayer(pub_id, name) => player::Cmd::Add( pub_id, name).apply_to(state),

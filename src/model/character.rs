@@ -7,9 +7,9 @@ use crate::prelude::*;
 /// `Cmd` is a facade for `cmd` functions.
 #[derive(Debug, Eq, PartialEq)]
 pub enum Character {
-    Add(PubId, Name),
+    Add(PubId, &'static Name),
     Remove(PubId),
-    Rename(PubId, Name),
+    Rename(PubId, &'static Name),
     AssignPlayer(PubId, PubId),
 }
 
@@ -45,7 +45,7 @@ pub mod cmd {
     /// assert!(character::qry::exists(&state,pub_id));
     /// assert_eq!(character::qry::name(&state,pub_id), name.clone());
     /// ```
-    pub fn add(state: State, character_pub_id: PubId, starting_name: String) -> CmdResult<State> {
+    pub fn add(state: State, character_pub_id: PubId, starting_name: &'static Name) -> CmdResult<State> {
         vec![
             Entity::Add(character_pub_id),
             Entity::Classify(character_pub_id, EntityType::Character),
@@ -88,7 +88,7 @@ pub mod cmd {
     }
 
     /// COMMAND > Rename a character
-    pub fn rename(state: State, character_pub_id: PubId, new_name: String) -> CmdResult<State> {
+    pub fn rename(state: State, character_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
         entity::Entity::Name(character_pub_id, new_name).apply_to(state)
     }
 
@@ -140,8 +140,8 @@ pub mod qry {
     ///     Cmd::AddPlayer(102, "APlayer".to_string())
     /// ].apply_to_default().unwrap();
     ///
-    /// assert!(character::is_character(&state,100));
-    /// assert!(! character::is_character(&state,102));
+    /// assert!(character::qry::is_character(&state,100));
+    /// assert!(! character::qry::is_character(&state,102));
     /// ```
     pub fn is_character(state: &State, character_pub_id: Id) -> bool {
         entity_type::qry::is(state, character_pub_id, EntityType::Character)
