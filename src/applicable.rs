@@ -146,3 +146,26 @@ impl ApplicableChainable for CmdResult<State> {
         }
     }
 }
+
+
+/// Implement closures that match the command format as commands
+/// They're not serializable but are useful when creating procesing
+/// pipelines.
+impl <F: FnOnce(State)->CmdResult<State> > Applicable for F {
+
+    /// ```
+    /// use yourupnext::prelude::*;
+    /// let state = State::default()
+    ///     .apply( |state| entity::cmd::add(state, 100) )
+    ///     .unwrap();
+    ///
+    /// assert!( entity::qry::exists(&state, 100));
+    ///
+    /// ```
+    fn apply_to(self, state: State) -> CmdResult<State> {
+        self(state)
+    }
+    fn apply_to_default(self) -> CmdResult<State> {
+        self(State::default() )
+    }
+}
