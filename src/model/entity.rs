@@ -52,8 +52,8 @@ pub mod cmd {
     /// COMMAND > Add an entity
     /// ```
     /// use yourupnext::prelude::*;
-    ///     let state = entity::cmd::add( State::default(), 100).unwrap();
-    ///     assert_eq!(entity::qry::id(&state,100), 1)
+    /// let state = entity::cmd::add( State::default(), 100).unwrap();
+    /// assert_eq!(entity::qry::id(&state,100), 1)
     /// ```
     pub fn add(state: State, pub_id: PubId) -> CmdResult<State> {
         registry::register(state, pub_id)
@@ -87,7 +87,7 @@ pub mod cmd {
     /// ```
     /// use yourupnext::prelude::*;
     /// let state = entity::cmd::add( State::default(), 100).unwrap();
-    /// let renamed_state = entity::cmd::name( state, 100, "AName".to_string() ).unwrap();
+    /// let renamed_state = entity::cmd::name( state, 100, "AName" ).unwrap();
     /// assert_eq!(entity::qry::name(&renamed_state,100), "AName".to_string() )
     /// ```
     pub fn name(state: State, entity_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
@@ -108,7 +108,7 @@ pub mod qry {
     /// use yourupnext::prelude::*;
     /// let state = entity::cmd::add( State::default(), 100).unwrap();
     /// assert!(entity::qry::exists(&state,100));
-    /// assert!( ! entity::qry::exists(&state,1));
+    /// assert!(! entity::qry::exists(&state,1));
     /// ```
     pub fn exists(state: &State, entity_pub_id: PubId) -> bool {
         id(state, entity_pub_id) != 0
@@ -175,7 +175,7 @@ pub mod qry {
     /// assert_eq!(entity::qry::name(&state, 100), "".to_string());
     ///
     /// let state = entity::cmd::add( state, 100).unwrap();
-    /// let state = entity::cmd::name( state, 100, "Named".to_string()).unwrap();
+    /// let state = entity::cmd::name( state, 100, "Named").unwrap();
     /// assert_eq!(entity::qry::name(&state, 100), "Named".to_string());
     /// ```
     pub fn name(state: &State, entity_pub_id: PubId) -> String {
