@@ -54,7 +54,7 @@ pub mod qry {
     /// let state = Entity::Add(100).apply_to_default().unwrap();
     /// let state = name::Cmd::Set(100, "AName").apply_to(state).unwrap();
     ///
-    /// assert_eq!(name::qry::get(&state,100), "AName".to_string() )
+    /// assert_eq!(name::qry::get(&state,100), "AName".to_string() );
     /// ```
     pub fn get(state: &State, entity_pub_id: PubId) -> String {
         let id = entity::qry::id( state, entity_pub_id);

@@ -37,13 +37,12 @@ pub mod cmd {
     /// use yourupnext::prelude::*;
     ///
     /// let pub_id = 100;
-    /// let name = "ACharacter".to_string();
-    /// let state = vec![
-    ///     Character::Add(pub_id, name.clone())
-    /// ].apply_to_default().unwrap();
+    /// let state = State::default()
+    ///     .apply(Character::Add(pub_id, "ACharacter"))
+    ///     .unwrap();
     ///
     /// assert!(character::qry::exists(&state,pub_id));
-    /// assert_eq!(character::qry::name(&state,pub_id), name.clone());
+    /// assert_eq!(character::qry::name(&state,pub_id), "ACharacter".to_string());
     /// ```
     pub fn add(state: State, character_pub_id: PubId, starting_name: &'static Name) -> CmdResult<State> {
         vec![
@@ -59,12 +58,11 @@ pub mod cmd {
     ///
     /// let player_pub_id = 100;
     /// let character_pub_id = 200;
-    ///
-    /// let state = vec![
-    ///     Cmd::Character( Character::Add(character_pub_id,"ACharacter".to_string())),
-    ///     Cmd::Player( Player::Add(player_pub_id,"APlayer".to_string()) ),
-    ///     Cmd::Character( Character::AssignPlayer(character_pub_id,player_pub_id)),
-    /// ].apply_to_default().unwrap();
+    /// let state = State::default()
+    ///     .apply( Character::Add(character_pub_id,"ACharacter"))
+    ///     .apply( Player::Add(player_pub_id,"APlayer") )
+    ///     .apply( Character::AssignPlayer(character_pub_id,player_pub_id))
+    ///     .unwrap();
     ///
     /// println!("{:#?}", state);
     /// println!("{:?}", character_pub_id);
@@ -89,18 +87,18 @@ pub mod cmd {
 
     /// COMMAND > Rename a character
     pub fn rename(state: State, character_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
-        entity::Entity::Name(character_pub_id, new_name).apply_to(state)
+        Entity::Name(character_pub_id, new_name).apply_to(state)
     }
 
     /// COMMAND > Remove a character
     ///```
     /// use yourupnext::prelude::*;
-    /// let state = vec![
-    ///    Cmd::AddCharacter(1,"ACharacter".to_string()),
-    ///    Cmd::RemoveCharacter(1)
-    /// ].apply_to_default().unwrap();
+    /// let state = State::default()
+    ///    .apply( Character::Add(1,"ACharacter") )
+    ///    .apply( Character::Remove(1) )
+    ///    .unwrap();
     ///
-    /// assert_eq!(character::id(&state,1), 0);
+    /// assert_eq!(character::qry::id(&state,1), 0);
     /// ```
     pub fn remove(mut state: State, character_pub_id: PubId) -> CmdResult<State> {
         let id = character::qry::id(&state, character_pub_id);
@@ -119,55 +117,29 @@ pub mod qry {
     use super::*;
 
     /// QUERY > Check if a character exists
-    /// ```
-    /// use yourupnext::prelude::*;
-    /// let state = vec![
-    ///     Cmd::AddCharacter(100, "ACharacter".to_string()),
-    /// ].apply_to_default().unwrap();
-    ///
-    /// assert!(character::exists(&state,100));
-    /// assert!(! character::exists(&state,1));
-    /// ```
+    /// See `entity_type` component for tests
     pub fn exists(state: &State, character_pub_id: PubId) -> bool {
-        is_character(state, character_pub_id)
-    }
-
-    /// Query > Check if a private Id is a valid character entity type
-    /// ```
-    /// use yourupnext::prelude::*;
-    /// let state = vec![
-    ///     Cmd::AddCharacter(100, "ACharacter".to_string()),
-    ///     Cmd::AddPlayer(102, "APlayer".to_string())
-    /// ].apply_to_default().unwrap();
-    ///
-    /// assert!(character::qry::is_character(&state,100));
-    /// assert!(! character::qry::is_character(&state,102));
-    /// ```
-    pub fn is_character(state: &State, character_pub_id: Id) -> bool {
         entity_type::qry::is(state, character_pub_id, EntityType::Character)
     }
 
-    /// QUERY > Get the Id of a character
+    /// QUERY > Get a character's `Id`
     /// ```
     /// use yourupnext::prelude::*;
-    /// let state = vec![
-    ///     Cmd::AddCharacter(100, "ACharacter".to_string()),
-    ///     Cmd::AddPlayer(102, "APlayer".to_string())
-    /// ].apply_to_default().unwrap();
     ///
-    /// assert_eq!(character::id(&state,100), 1);
+    /// let pub_id: PubId = 100;
+    /// let state = Character::Add(pub_id,"ACharacter")
+    ///     .apply_to_default()
+    ///     .unwrap();
     ///
-    /// // A missing internal id is a 0, which will always
-    /// // fail to match entities. This is done to avoid
-    /// // unwrapping every query. It's a common query.
-    /// assert_eq!(character::id(&state,1), 0);
+    /// assert_eq!(character::qry::id(&state, pub_id), 1);
     ///
-    /// // Incorrect entity types will yield a zero id as well.
-    /// assert_eq!(character::id(&state,102), 0);
+    /// let nonexistant_pub_id: PubId = 200;
+    /// assert_eq!(character::qry::id(&state, nonexistant_pub_id), 0);
+    ///
     /// ```
-    pub fn id(state: &State, character_pub_id: PubId) -> Id {
-        match entity::qry::is(state, character_pub_id, EntityType::Character) {
-            true => entity::qry::id(state, character_pub_id),
+    pub fn id(state: &State, player_pub_id: PubId) -> Id {
+        match exists(state, player_pub_id) {
+            true => entity::qry::id(state, player_pub_id),
             false => 0
         }
     }
@@ -176,11 +148,11 @@ pub mod qry {
     /// ```
     /// use yourupnext::prelude::*;
     ///
-    /// let state = vec![
-    ///     Cmd::Player( Player::Add(1,"APlayer".to_string()) ),
-    ///     Cmd::Character( Character::Add(2,"ACharacter".to_string()) ),
-    ///     Cmd::Character( Character::AssignPlayer(2,1) ),
-    /// ].apply_to_default().unwrap();
+    /// let state = State::default()
+    ///     .apply( Player::Add(1,"APlayer") )
+    ///     .apply( Character::Add(2,"ACharacter") )
+    ///     .apply( Character::AssignPlayer(2,1) )
+    ///     .unwrap();
     ///
     /// // PubId 1 refers to a player, its "player" id is None
     /// assert_eq!(character::qry::player(&state,1), None);
@@ -189,7 +161,7 @@ pub mod qry {
     /// assert_eq!(character::qry::player(&state,2), Some(1));
     /// ```
     pub fn player(state: &State, character_pub_id: PubId) -> Option<PubId> {
-        if ! is_character(state, character_pub_id) {
+        if ! exists(state, character_pub_id) {
             return None;
         }
         let child_id = id(state, character_pub_id);
@@ -197,21 +169,9 @@ pub mod qry {
         entity::qry::pub_id(state, parent_id)
     }
 
-    /// QUERY > Get the `Name` of a character
-    /// ```
-    /// use yourupnext::prelude::*;
-    ///
-    /// let state = Cmd::AddCharacter(1,"ACharacter".to_string())
-    ///     .apply_to_default()
-    ///     .unwrap();
-    ///
-    /// // PubId 1 refers to a player, its "player" id is None
-    /// assert_eq!(character::name(&state,1), "ACharacter".to_string());
-    ///
-    /// // Unnamed characters will return an empty string
-    /// assert_eq!(character::name(&state,2), String::new() );
-    /// ```
-    pub fn name(state: &State, character_pub_id: PubId) -> String {
-        name::qry::get(state, character_pub_id)
+    /// QUERY > Get a characters's `name` as String
+    /// See `name` component for tests
+    pub fn name(state: &State, player_pub_id: PubId) -> String {
+        name::qry::get(state, player_pub_id)
     }
 }
