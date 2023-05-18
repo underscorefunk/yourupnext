@@ -274,6 +274,38 @@ impl Hierarchy {
         Ok(())
     }
 
+
+    /// Remove any instances of a parent being assigned to a child
+    /// ```
+    /// use yourupnext::prelude::Hierarchy;
+    ///
+    /// let mut h = Hierarchy::new();
+    ///
+    /// // P───┐   ┌───┐
+    /// // │ 0 ├─┬▶│ 1 │
+    /// // └───┘ │ └───C
+    /// //       │ P───┐
+    /// //       └▶│ 2 │
+    /// //         └───C
+    ///
+    /// let _ = h.set_parent(1, 0);
+    /// let _ = h.set_parent(2, 0);
+    /// let _ = h.free_children_from(0);
+    ///
+    /// assert_eq!( h.parent_count(), 0 );
+    /// assert_eq!( h.child_count(), 0 );
+    /// ```
+    pub fn free_children_from(&mut self, parent: Id) -> CmdResult<()> {
+        for child in self.children(parent).into_iter() {
+            self.remove_parent(child)?;
+        }
+
+        Ok(())
+    }
+
+    // maybe create "adopt from parent (source -> destination) to move a branch?
+    // or "Transfer Children"
+
     /// Establish hierarchical relationship by assigning a child to a parent
     ///
     /// ```

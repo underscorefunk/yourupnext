@@ -11,6 +11,8 @@ pub enum Character {
     Remove(PubId),
     Rename(PubId, &'static Name),
     AssignPlayer(PubId, PubId),
+    RemovePlayer(PubId),
+    RemovePlayerFromAll(PubId)
 }
 
 impl Applicable for Character {
@@ -20,6 +22,8 @@ impl Applicable for Character {
             Character::Remove(pub_id) => cmd::remove(state, pub_id),
             Character::Rename(pub_id, name) => cmd::rename(state, pub_id, name),
             Character::AssignPlayer(pub_id, player_pub_id) => cmd::assign_player(state, pub_id, player_pub_id),
+            Character::RemovePlayer(pub_id) => cmd::remove_player(state, pub_id),
+            Character::RemovePlayerFromAll(pub_id) => cmd::remove_player_form_all(state, pub_id)
         }
     }
     fn apply_to_default(self) -> CmdResult<State> {
@@ -85,6 +89,72 @@ pub mod cmd {
 
         Ok(state)
     }
+
+    /// COMMAND > Remove a character's assigned player
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let player_pub_id = 100;
+    /// let character_pub_id = 200;
+    /// let state = State::default()
+    ///     .apply( Character::Add(character_pub_id,"ACharacter"))
+    ///     .apply( Player::Add(player_pub_id,"APlayer") )
+    ///     .apply( Character::AssignPlayer(character_pub_id,player_pub_id))
+    ///     .apply( Character::RemovePlayer(character_pub_id) )
+    ///     .unwrap();
+    ///
+    /// assert_eq!( character::qry::player(&state, character_pub_id), None);
+    /// ```
+    pub fn remove_player(mut state: State, character_pub_id:PubId) -> CmdResult<State> {
+        if !entity_type::qry::is(&state, character_pub_id, EntityType::Character) {
+            return Err("Can not remove character player for non character entity".to_string());
+        }
+        let player_pub_id = qry::player(&state, character_pub_id);
+
+        if player_pub_id.is_none() {
+            return Err("Can not remove character player where character didn't have a player assigned".to_string());
+        }
+        let character_id = entity::qry::id(&state, character_pub_id);
+
+        state.character_player.remove_parent(character_id)?;
+        Ok(state)
+
+    }
+
+    /// COMMAND > Remove all players assigned to any character
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///     .apply( Player::Add(100,"APlayer") )
+    ///     .apply( Character::Add(200,"ACharacter"))
+    ///     .apply( Character::AssignPlayer(200,100))
+    ///     .apply( Character::Add(300,"BCharacter"))
+    ///     .apply( Character::AssignPlayer(300,100))
+    ///     .unwrap();
+    ///
+    /// assert_eq!(character::qry::player(&state, 200), Some(100));
+    /// assert_eq!(character::qry::player(&state, 300), Some(100));
+    ///
+    /// let state = state.apply( Character::RemovePlayerFromAll(100)).unwrap();
+    ///
+    /// assert_eq!(character::qry::player(&state, 200), None);
+    /// assert_eq!(character::qry::player(&state, 300), None);
+    ///
+    /// ```
+    pub fn remove_player_form_all(mut state: State, player_pub_id: PubId) -> CmdResult<State> {
+
+        if !entity_type::qry::is(&state, player_pub_id, EntityType::Player) {
+            return Err("Can not remove any instances of a player being assigned to characters for non-player entity".to_string());
+        }
+
+        let player_id = entity::qry::id(&state, player_pub_id);
+
+        state.character_player.free_children_from(player_id)?;
+
+        Ok(state)
+    }
+
 
     /// COMMAND > Rename a character
     pub fn rename(state: State, character_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {

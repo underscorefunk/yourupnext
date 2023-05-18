@@ -1,3 +1,6 @@
+/// # Round Subsyste
+/// Responsible for the order of play and tracking events over time.
+
 use crate::prelude::*;
 
 pub type RoundCount = usize;
