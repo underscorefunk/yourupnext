@@ -64,9 +64,7 @@ pub mod cmd {
     ///     .apply( Character::AssignPlayer(character_pub_id,player_pub_id))
     ///     .unwrap();
     ///
-    /// println!("{:#?}", state);
-    /// println!("{:?}", character_pub_id);
-    /// println!("{:?}", character::qry::player(&state,character_pub_id) );
+    /// assert_eq!(character::qry::player(&state,character_pub_id), Some(100));
     /// assert_eq!(character::qry::player(&state,character_pub_id), Some(player_pub_id));
     ///
     /// ```
@@ -80,7 +78,10 @@ pub mod cmd {
             return Err("Can not assign player to character when the target player isn't a Player entity type.".to_string());
         }
 
-        state.character_player.set_parent(character_pub_id, player_pub_id)?;
+        let character_id = entity::qry::id(&state, character_pub_id);
+        let player_id = entity::qry::id(&state, player_pub_id);
+
+        state.character_player.set_parent(character_id, player_id)?;
 
         Ok(state)
     }
@@ -94,11 +95,11 @@ pub mod cmd {
     ///```
     /// use yourupnext::prelude::*;
     /// let state = State::default()
-    ///    .apply( Character::Add(1,"ACharacter") )
-    ///    .apply( Character::Remove(1) )
+    ///    .apply( Character::Add(100,"ACharacter") )
+    ///    .apply( Character::Remove(100) )
     ///    .unwrap();
     ///
-    /// assert_eq!(character::qry::id(&state,1), 0);
+    /// assert_eq!(character::qry::id(&state,100), 0);
     /// ```
     pub fn remove(mut state: State, character_pub_id: PubId) -> CmdResult<State> {
         let id = character::qry::id(&state, character_pub_id);
@@ -117,7 +118,16 @@ pub mod qry {
     use super::*;
 
     /// QUERY > Check if a character exists
-    /// See `entity_type` component for tests
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let pub_id: PubId = 123;
+    /// let state = Character::Add(pub_id,"ACharacter")
+    ///     .apply_to_default()
+    ///     .unwrap();
+    ///
+    /// assert!(character::qry::exists(&state, pub_id));
+    /// ```
     pub fn exists(state: &State, character_pub_id: PubId) -> bool {
         entity_type::qry::is(state, character_pub_id, EntityType::Character)
     }
@@ -137,9 +147,9 @@ pub mod qry {
     /// assert_eq!(character::qry::id(&state, nonexistant_pub_id), 0);
     ///
     /// ```
-    pub fn id(state: &State, player_pub_id: PubId) -> Id {
-        match exists(state, player_pub_id) {
-            true => entity::qry::id(state, player_pub_id),
+    pub fn id(state: &State, character_pub_id: PubId) -> Id {
+        match exists(state, character_pub_id) {
+            true => entity::qry::id(state, character_pub_id),
             false => 0
         }
     }
@@ -147,18 +157,19 @@ pub mod qry {
     /// QUERY > Get the Public Id (`pub_id`) of a character's `Player`
     /// ```
     /// use yourupnext::prelude::*;
-    ///
+    /// let player_public_id = 100;
+    /// let character_public_id = 200;
     /// let state = State::default()
-    ///     .apply( Player::Add(1,"APlayer") )
-    ///     .apply( Character::Add(2,"ACharacter") )
-    ///     .apply( Character::AssignPlayer(2,1) )
+    ///     .apply( Player::Add(player_public_id,"APlayer") )
+    ///     .apply( Character::Add(character_public_id,"ACharacter") )
+    ///     .apply( Character::AssignPlayer(character_public_id,player_public_id) )
     ///     .unwrap();
     ///
-    /// // PubId 1 refers to a player, its "player" id is None
-    /// assert_eq!(character::qry::player(&state,1), None);
+    /// // PubId 100 refers to a player, its "player" id is None
+    /// assert_eq!(character::qry::player(&state,player_public_id), None);
     ///
     /// // PubId 2 refers to a character, its "player" id is 1
-    /// assert_eq!(character::qry::player(&state,2), Some(1));
+    /// assert_eq!(character::qry::player(&state,character_public_id), Some(player_public_id));
     /// ```
     pub fn player(state: &State, character_pub_id: PubId) -> Option<PubId> {
         if ! exists(state, character_pub_id) {

@@ -144,10 +144,12 @@ impl Hierarchy {
     /// ```
     /// use yourupnext::prelude::Hierarchy;
     /// let mut h = Hierarchy::new();
-    /// let _ = h.set_parent(1, 0);
+    /// let parent = 1;
+    /// let child = 2;
+    /// let _ = h.set_parent(child, parent);
     ///
-    /// assert!( h.parent(0).is_none() );
-    /// assert_eq!( h.parent(1), Some(0) );
+    /// assert!( h.parent(parent).is_none() );
+    /// assert_eq!( h.parent(child), Some(parent) );
     /// ```
     pub fn parent(&self, child: Id) -> Option<Id> {
         match self.child_parent.get(&child) {

@@ -41,7 +41,7 @@ pub mod cmd {
     ///     .unwrap();
     ///
     /// assert!(player::qry::exists(&state,pub_id));
-    /// assert_eq!(player::qry::name(&state,pub_id), "APlayer");
+    /// assert_eq!(player::qry::name(&state,pub_id), "APlayer".to_string());
     ///
     /// ```
     pub fn add(state: State, player_pub_id: PubId, starting_name: &'static Name) -> CmdResult<State> {

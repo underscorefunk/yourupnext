@@ -117,10 +117,11 @@ impl State {
     /// use yourupnext::prelude::*;
     ///
     /// let state = State::default()
-    ///     .apply( Player::Add(1,"APlayer".to_string()))
-    ///     .apply( Character::Add(2,"ACharacter".to_string()));
+    ///     .apply( Player::Add(100,"APlayer"))
+    ///     .apply( Character::Add(200,"ACharacter"))
+    ///     .unwrap();
     ///
-    /// assert!( character::qry::exists(&state, 2) );
+    /// assert!( character::qry::exists(&state, 200) );
     ///
     /// ```
     ///
