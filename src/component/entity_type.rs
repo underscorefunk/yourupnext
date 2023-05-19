@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum EntityType {
     Player,
+    Scenario,
     Character,
     Item,
     Location,
@@ -15,6 +16,7 @@ impl EntityType {
     fn label(self) -> String {
         match self {
             EntityType::Player => "Player".to_string(),
+            EntityType::Scenario => "Scenario".to_string(),
             EntityType::Character => "Character".to_string(),
             EntityType::Item => "Item".to_string(),
             EntityType::Location => "Location".to_string(),

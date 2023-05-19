@@ -23,6 +23,8 @@ pub use crate::{
         player::Player,
         character,
         character::Character,
+        scenario,
+        scenario::Scenario,
     },
 
     registry::{
@@ -43,10 +45,12 @@ pub use crate::{
         entity_type::{
             EntityType,
         },
+
         name,
         name::{
             Name
         },
+
         description,
         description::{
             Description

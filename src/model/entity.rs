@@ -18,7 +18,8 @@ pub enum Entity {
     Add(PubId),
     Remove(PubId),
     Classify(PubId, EntityType),
-    Name(PubId, &'static Name)
+    Name(PubId, &'static Name),
+    Describe(PubId, &'static Description)
 }
 
 impl Applicable for Entity {
@@ -27,7 +28,8 @@ impl Applicable for Entity {
             Entity::Add(pub_id) => cmd::add(state, pub_id),
             Entity::Remove(pub_id) => cmd::remove(state, pub_id),
             Entity::Classify(pub_id, entity_type) => cmd::classify(state, pub_id, entity_type),
-            Entity::Name(pub_id, name) => cmd::name(state, pub_id, name)
+            Entity::Name(pub_id, name) => cmd::name(state, pub_id, name),
+            Entity::Describe(pub_id, description) => cmd::describe(state, pub_id, description)
         }
     }
     fn apply_to_default(self) -> CmdResult<State> {
@@ -92,6 +94,22 @@ pub mod cmd {
     /// ```
     pub fn name(state: State, entity_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
         name::cmd::set(state, entity_pub_id, new_name)
+    }
+
+
+    /// COMMAND > Describe an entity
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///     .apply(|state|entity::cmd::add(state,100))
+    ///     .apply(|state|entity::cmd::describe( state, 100, "AName" ))
+    ///     .unwrap();
+    ///
+    /// assert_eq!(entity::qry::description(&state,100), "AName".to_string() )
+    /// ```
+    pub fn describe(state: State, entity_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
+        description::cmd::set(state, entity_pub_id, new_name)
     }
 
 }
@@ -180,5 +198,22 @@ pub mod qry {
     /// ```
     pub fn name(state: &State, entity_pub_id: PubId) -> String {
         name::qry::get(state, entity_pub_id)
+    }
+
+
+    /// QUERY > Get the Description of an entity or any empty string
+    /// if it doesn't exist
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///     .apply(|state|entity::cmd::add(state,100))
+    ///     .apply(|state|entity::cmd::describe( state, 100, "AName" ))
+    ///     .unwrap();
+    ///
+    /// assert_eq!(entity::qry::description(&state,100), "AName".to_string() )
+    /// ```
+    pub fn description(state: &State, entity_pub_id: PubId) -> String {
+        description::qry::get(state, entity_pub_id)
     }
 }

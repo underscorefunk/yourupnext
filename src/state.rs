@@ -8,6 +8,7 @@ pub struct State {
     pub name: Component<String>,
     pub description: Component<String>,
     pub character_player: Hierarchy,
+    pub character_scenario: Hierarchy,
 }
 
 impl Default for State {
@@ -18,6 +19,7 @@ impl Default for State {
             name: Component::default(),
             description: Component::default(),
             character_player: Hierarchy::default(),
+            character_scenario: Hierarchy::default(),
         }
     }
 }

@@ -41,6 +41,9 @@ modules to avoid variable name collisions.
 - Queries are done as functions
 
 
+- A parent can `capture` a child
+- A child is `assigned` to a parent
+
 
 ## Reminders
 - [] Should start of round and end of round have timers to things that require resolution?
