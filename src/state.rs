@@ -6,8 +6,8 @@ pub struct State {
     pub registry: Registry,
     pub entity_type: Component<EntityType>,
     pub name: Component<String>,
+    pub description: Component<String>,
     pub character_player: Hierarchy,
-    pub round: Round,
 }
 
 impl Default for State {
@@ -16,8 +16,8 @@ impl Default for State {
             registry: Registry::default(),
             entity_type: Component::default(),
             name: Component::default(),
+            description: Component::default(),
             character_player: Hierarchy::default(),
-            round: Round::default(),
         }
     }
 }

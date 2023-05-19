@@ -47,14 +47,10 @@ pub use crate::{
         name::{
             Name
         },
+        description,
+        description::{
+            Description
+        },
     },
 
-    subsys,
-    subsys::{
-        round::{
-            Round,
-            Initiative,
-            TurnStatus
-        }
-    }
 };
