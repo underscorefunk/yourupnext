@@ -55,6 +55,16 @@ pub use crate::{
         description::{
             Description
         },
+
+        turn_state,
+        turn_state::{
+            TurnState
+        },
+
+        turn_count,
+        turn_count::{
+            TurnCount
+        },
     },
 
 };

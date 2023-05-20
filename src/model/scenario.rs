@@ -1,4 +1,7 @@
-/// # Scenario
+/// # Scenario Model
+/// Note, there can be more than one scenario active at a time
+/// Todo - Assignment of a character to one scenario should remove
+///        them from a previous scenario.
 
 use crate::prelude::*;
 

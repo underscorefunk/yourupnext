@@ -18,7 +18,6 @@ pub mod registry;
 pub mod component;
 pub mod structure;
 pub mod model;
-pub mod subsys;
 
 
 
