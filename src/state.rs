@@ -10,9 +10,11 @@ pub struct State {
     pub description: Component<String>,
     pub turn_state: Component<TurnState>,
     pub turn_count: Component<TurnCount>,
+    pub turn_order: Component<TurnOrder>,
 
     pub character_player: Hierarchy,
-    pub character_scenario: Hierarchy, //make this an association
+
+    pub character_scenario: Hierarchy, //make this an association (Scenario members)
 
 }
 
@@ -25,9 +27,19 @@ impl Default for State {
             description: Component::default(),
             turn_state: Component::default(),
             turn_count: Component::default(),
+            turn_order: Component::default(),
 
             character_player: Hierarchy::default(),
             character_scenario: Hierarchy::default(),
         }
     }
+}
+
+pub mod qry {
+    use super::*;
+
+    // id
+    // ids
+    // pub_id
+    // pub_ids
 }

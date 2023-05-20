@@ -148,6 +148,25 @@ pub mod qry {
         registry::pub_id(state, entity_id)
     }
 
+    /// Query > Get the Pub Ids given a set of IDs
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///         .apply( Character::Add(100, "ACharacter") )
+    ///         .apply( Player::Add(200, "APlayer") )
+    ///         .unwrap();
+    ///
+    /// assert_eq!( entity::qry::pub_ids(&state, vec![1,2]), vec![100,200]  );
+    ///
+    /// ```
+    pub fn pub_ids(state: &State, ids: Vec<Id> ) -> Vec<PubId> {
+        ids.iter()
+            .map(|id| qry::pub_id(state, *id))
+            .filter(|maybe_id|maybe_id.is_some())
+            .map(|some_id|some_id.unwrap())
+            .collect()
+    }
     /// QUERY > Check of an entity is of a specific type
     /// ```
     /// use yourupnext::prelude::*;
@@ -216,4 +235,6 @@ pub mod qry {
     pub fn description(state: &State, entity_pub_id: PubId) -> String {
         description::qry::get(state, entity_pub_id)
     }
+
+
 }

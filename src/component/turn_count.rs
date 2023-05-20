@@ -2,32 +2,40 @@ use crate::prelude::*;
 
 pub type TurnCount = u8;
 
+#[cfg(test)]
+mod test {
+
+    use crate::prelude::*;
+
+    #[test]
+    fn turn_count() {
+
+        let state = State::default()
+            .apply( Entity::Add(100) )
+            .unwrap();
+
+        assert_eq!( turn_count::qry::count(&state, 100), 0);
+
+        let state = state
+            .apply( |state| turn_count::cmd::count(state, 100 ))
+            .apply( |state| turn_count::cmd::count(state, 100 ))
+            .unwrap();
+
+        assert_eq!( turn_count::qry::count(&state, 100), 2);
+
+        let state = state
+            .apply(|state|turn_count::cmd::reset(state, 100))
+            .unwrap();
+
+        assert_eq!( turn_count::qry::count(&state, 100), 0);
+    }
+
+}
+
 pub mod cmd {
     use super::*;
 
     /// COMMAND > Increment an entity's turn count
-    /// ```
-    /// use yourupnext::prelude::*;
-    ///
-    /// let state = State::default()
-    ///     .apply( Entity::Add(100) )
-    ///     .unwrap();
-    ///
-    /// assert_eq!( turn_count::qry::count(&state, 100), 0);
-    ///
-    /// let state = state
-    ///     .apply( |state| turn_count::cmd::count(state, 100 ))
-    ///     .apply( |state| turn_count::cmd::count(state, 100 ))
-    ///     .unwrap();
-    ///
-    /// assert_eq!( turn_count::qry::count(&state, 100), 2);
-    ///
-    /// let state = state
-    ///     .apply(|state|turn_count::cmd::reset(state, 100))
-    ///     .unwrap();
-    ///
-    /// assert_eq!( turn_count::qry::count(&state, 100), 0);
-    /// ```
     pub fn count(mut state: State, pub_id: PubId) -> CmdResult<State> {
 
         let id = entity::qry::id(&state, pub_id);
