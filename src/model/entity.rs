@@ -167,6 +167,25 @@ pub mod qry {
             .map(|some_id|some_id.unwrap())
             .collect()
     }
+
+    /// Query > Get the Pub Ids given a set of IDs
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///         .apply( Character::Add(100, "ACharacter") )
+    ///         .apply( Player::Add(200, "APlayer") )
+    ///         .unwrap();
+    ///
+    /// assert_eq!( entity::qry::ids(&state, vec![100,200]), vec![1,2]  );
+    ///
+    /// ```
+    pub fn ids(state: &State, pub_ids: Vec<PubId> ) -> Vec<Id> {
+        pub_ids.iter()
+            .map(|pub_id| qry::id(state, *pub_id))
+            .filter(|maybe_id|*maybe_id != 0 as Id )
+            .collect()
+    }
     /// QUERY > Check of an entity is of a specific type
     /// ```
     /// use yourupnext::prelude::*;

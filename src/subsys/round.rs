@@ -40,32 +40,6 @@ impl Default for Round {
 }
 
 impl Round {
-    pub fn add_turn(&mut self, entity_id: Id, initiative: Initiative) -> CmdResult<()> {
-        if self.sequence.contains(&entity_id) {
-            return Err("Unable to add entity turn. It already exists in the sequence of play.".to_string());
-        }
-
-        self.initiatives.insert(entity_id, initiative)?;
-        self.turn_states.insert(entity_id, TurnStatus::Available)?;
-        self.sequence.push(entity_id);
-
-        Ok(())
-    }
-
-    pub fn remove_turn(&mut self, entity_id: Id) -> CmdResult<()> {
-        if !self.sequence.contains(&entity_id) {
-            return Err("Unable to remove turn for entity that isn't in the round's sequence.".to_string());
-        }
-
-        self.sequence = self.sequence.clone()
-            .into_iter()
-            .filter(|e_id| e_id != &entity_id)
-            .collect();
-        self.turn_states.delete(entity_id)?;
-        self.initiatives.delete(entity_id)?;
-
-        Ok(())
-    }
 
     pub fn order_turns_by_initiative(&mut self) -> CmdResult<()> {
         if self.sequence.len() < 2 {
