@@ -1,8 +1,15 @@
+/// # Turn State Component
+/// Scenarios can have a turn state that dictates which mode they're in.
+/// Free, Active, or Completed. This allows us to cycle
+/// through all of the sequences and then all of the turns.
+///
+
 use crate::prelude::*;
 
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TurnState {
+    Free,
     Available,
     Active,
     Paused,

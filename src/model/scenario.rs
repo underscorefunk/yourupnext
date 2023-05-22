@@ -1,8 +1,30 @@
 /// # Scenario Model
-/// Note, there can be more than one scenario active at a time
-/// Todo - Assignment of a character to one scenario should remove
-///        them from a previous scenario.
-
+/// A scenario is a structural idea that holds a topic or focus of play.
+/// You can think of a campaign as a series of scenarios. Scenarios are
+/// entities and as such can be nested or assigned to another scenario.
+///
+/// There must always be one root scenario.
+///
+/// ## Structure
+/// Scenarios are a bucket that contain associated `Entities`, which
+/// populate the scenario. Entities may or may not have turns in the
+/// scenario, e.g. they may be associated but purely as context.
+/// A scenario may be nested by being assigned to another scenario.
+///
+/// ## (Free/Active/Completed) Scenarios
+/// A scenario has a TurnState to indicate if it is active in
+/// *sequenced play (seq_play)*
+///
+/// The `SeqPlay` is responsible for handling actual turn/round progression.
+/// This module is intended to handle the association aspect.
+///
+/// ## Todo
+/// - Assignment of a character to one scenario should remove them from a
+///   previous scenario.
+/// - Review hierarchical "assignment" of nested scenarios
+/// - Confirm that another scenario capturing an entity will safely move it
+///   if required.
+///
 use crate::prelude::*;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -13,11 +35,10 @@ pub enum Scenario {
     Rename(PubId, &'static Name),
     Describe(PubId, &'static Name),
 
-    CaptureCharacter(PubId, PubId),
-    ReleaseCharacter(PubId),
-    ReleaseAllCharacters(PubId),
+    CaptureEntity(PubId, PubId),
+    ReleaseEntity(PubId),
+    ReleaseAllEntities(PubId),
 }
-
 
 impl Applicable for Scenario {
     fn apply_to(self, state: State) -> CmdResult<State> {
@@ -27,9 +48,13 @@ impl Applicable for Scenario {
             Scenario::Rename(pub_id, name) => cmd::rename(state, pub_id, name),
             Scenario::Describe(pub_id, description) => cmd::describe(state, pub_id, description),
 
-            Scenario::CaptureCharacter(pub_id, character_pub_id) => cmd::assign_character(state, pub_id, character_pub_id),
-            Scenario::ReleaseCharacter( character_pub_id) => cmd::release_character(state, character_pub_id),
-            Scenario::ReleaseAllCharacters(pub_id) => cmd::release_all_characters(state, pub_id)
+            Scenario::CaptureEntity(pub_id, entity_pub_id) => {
+                cmd::assign_entity(state, pub_id, entity_pub_id)
+            }
+            Scenario::ReleaseEntity(entity_pub_id) => {
+                cmd::release_entity(state, entity_pub_id)
+            }
+            Scenario::ReleaseAllEntities(pub_id) => cmd::release_all_entities(state, pub_id),
         }
     }
     fn apply_to_default(self) -> CmdResult<State> {
@@ -67,13 +92,21 @@ pub mod cmd {
 
     /// COMMAND > Rename a scenario
     /// See Entity::Name for tests
-    pub fn rename(state: State, scenario_pub_id: PubId, new_name: &'static Name) -> CmdResult<State> {
+    pub fn rename(
+        state: State,
+        scenario_pub_id: PubId,
+        new_name: &'static Name,
+    ) -> CmdResult<State> {
         Entity::Name(scenario_pub_id, new_name).apply_to(state)
     }
 
     /// COMMAND > Describe the scenario
     /// See Entity::Description for tests
-    pub fn describe(state: State, scenario_pub_id: PubId, desc: &'static Description) -> CmdResult<State> {
+    pub fn describe(
+        state: State,
+        scenario_pub_id: PubId,
+        desc: &'static Description,
+    ) -> CmdResult<State> {
         Entity::Describe(scenario_pub_id, desc).apply_to(state)
     }
 
@@ -87,15 +120,22 @@ pub mod cmd {
     /// let state = State::default()
     ///     .apply( Scenario::Add(scenario_pub_id) )
     ///     .apply( Character::Add(character_pub_id,"ACharacter"))
-    ///     .apply( Scenario::CaptureCharacter(scenario_pub_id,character_pub_id))
+    ///     .apply( Scenario::CaptureEntity(scenario_pub_id,character_pub_id))
     ///     .unwrap();
     ///
     /// assert_eq!(scenario::qry::find_character(&state,character_pub_id), Some(100));
     ///
     /// ```
-    pub fn assign_character(mut state: State, scenario_pub_id: PubId, character_pub_id: PubId) -> CmdResult<State> {
+    pub fn assign_entity(
+        mut state: State,
+        scenario_pub_id: PubId,
+        character_pub_id: PubId,
+    ) -> CmdResult<State> {
         if !entity_type::qry::is(&state, scenario_pub_id, EntityType::Scenario) {
-            return Err("Can not assign character to scenario when the target scenario isn't a scenario.".to_string());
+            return Err(
+                "Can not assign character to scenario when the target scenario isn't a scenario."
+                    .to_string(),
+            );
         }
 
         if !entity_type::qry::is(&state, character_pub_id, EntityType::Character) {
@@ -105,7 +145,9 @@ pub mod cmd {
         let scenario_id = entity::qry::id(&state, scenario_pub_id);
         let character_id = entity::qry::id(&state, character_pub_id);
 
-        state.character_scenario.set_parent(character_id, scenario_id)?;
+        state
+            .character_scenario
+            .set_parent(character_id, scenario_id)?;
 
         Ok(state)
     }
@@ -120,18 +162,20 @@ pub mod cmd {
     /// let state = State::default()
     ///     .apply( Scenario::Add(scenario_pub_id) )
     ///     .apply( Character::Add(character_pub_id, "ACharacter") )
-    ///     .apply( Scenario::CaptureCharacter(scenario_pub_id, character_pub_id) )
+    ///     .apply( Scenario::CaptureEntity(scenario_pub_id, character_pub_id) )
     ///     .unwrap();
     /// assert_eq!(scenario::qry::find_character(&state,character_pub_id), Some(100));
     ///
     /// let state = state
-    ///     .apply( Scenario::ReleaseCharacter(character_pub_id))
+    ///     .apply( Scenario::ReleaseEntity(character_pub_id))
     ///     .unwrap();
     /// assert_eq!( character::qry::player(&state, character_pub_id), None);
     /// ```
-    pub fn release_character(mut state: State, character_pub_id: PubId) -> CmdResult<State> {
+    pub fn release_entity(mut state: State, character_pub_id: PubId) -> CmdResult<State> {
         if !entity_type::qry::is(&state, character_pub_id, EntityType::Character) {
-            return Err("Can not remove character from scenario with non character entity".to_string());
+            return Err(
+                "Can not remove character from scenario with non character entity".to_string(),
+            );
         }
 
         let character_id = entity::qry::id(&state, character_pub_id);
@@ -146,7 +190,7 @@ pub mod cmd {
     }
 
     /// COMMAND > Remove/drain all characters from a scenario
-    pub fn release_all_characters(mut state: State, scenario_pub_id: PubId) -> CmdResult<State> {
+    pub fn release_all_entities(mut state: State, scenario_pub_id: PubId) -> CmdResult<State> {
         Ok(state)
     }
 }
@@ -178,7 +222,7 @@ pub mod qry {
     pub fn id(state: &State, scenario_pub_id: PubId) -> Id {
         match exists(state, scenario_pub_id) {
             true => entity::qry::id(state, scenario_pub_id),
-            false => 0
+            false => 0,
         }
     }
 

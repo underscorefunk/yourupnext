@@ -105,68 +105,6 @@ impl Round {
     }
 
 
-    fn update_turn_order(
-        &mut self,
-        entity_id: Id,
-        direction: i8,
-    ) -> CmdResult<()> {
-        if direction == 0 {
-            return Err("Can not reorder a turn that should move zero spots in the order.".to_string());
-        }
-
-        let index = self.sequence.iter().position(|&seq_e_id| seq_e_id == entity_id);
-
-        if index.is_none() {
-            return Err("Can not update the order of an entity's turn that isn't in sequence.".to_string());
-        }
-
-        let index: usize = index.unwrap();
-        let new_index = direction + index as i8;
-
-        if new_index < 0 {
-            return Err("Can't move turn that early in the round.".to_string());
-        }
-
-        if new_index >= self.sequence.len() as i8 {
-            return Err("Can't move turn that late in the round.".to_string());
-        }
-
-        self.sequence.remove(index);
-        self.sequence.insert(new_index as usize, entity_id);
-
-        Ok(())
-    }
-
-    pub fn move_turn_before(
-        &mut self,
-        entity_id_to_move: Id,
-        before_entity_id: Id,
-    ) -> CmdResult<()> {
-        if !self.sequence.contains(&entity_id_to_move) {
-            return Err("Unable to move a nonexistant turn before another turn.".to_string());
-        }
-        if !self.sequence.contains(&before_entity_id) {
-            return Err("Unable to move a turn to before a nonexistant turn.".to_string());
-        }
-        let entity_id_to_move_index = self.sequence.iter().position(|&seq_e_id| seq_e_id == entity_id_to_move).unwrap();
-        let before_entity_id_index = self.sequence.iter().position(|&seq_e_id| seq_e_id == before_entity_id).unwrap();
-
-        let forward_move_offset = match entity_id_to_move_index < before_entity_id_index {
-            true => -1,
-            false => 0
-        };
-        let distance: i8 = before_entity_id_index as i8 - entity_id_to_move_index as i8 + forward_move_offset;
-
-
-        if distance == 0 {
-            return Err("Can not move turn before another turn if it's already there.".to_string());
-        }
-
-        self.update_turn_order(entity_id_to_move, distance)?;
-
-        Ok(())
-    }
-
     pub fn activate_delayed_turn(
         &mut self,
         entity_id: Id,
