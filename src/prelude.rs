@@ -21,6 +21,7 @@ pub use crate::{
         entity::EntityId,
         entity::Entity,
         player,
+        player::PlayerId,
         player::Player,
         character,
         character::Character,
