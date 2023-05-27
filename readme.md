@@ -46,6 +46,7 @@ modules to avoid variable name collisions.
 
 
 ## Reminders
+- Implement "PubId.into(&State) for Id" and Id.into(&State) for PubId
 - [] Should start of round and end of round have timers to things that require resolution?
 - [] Implement turn counting. When an entity completes its turn, the count should be incremented. 
 Pausing/holding and skipping should not be counted.
@@ -68,3 +69,7 @@ Pausing/holding and skipping should not be counted.
 // Create events source list with undo and redo
 // ----------------------------------------------------------------
 //
+
+
+
+- Public Identifiers (PubId) have aliases for context so that enum variant data that only displays the type can hint at the usage.

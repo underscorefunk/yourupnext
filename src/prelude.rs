@@ -18,13 +18,17 @@ pub use crate::{
     },
     model::{
         entity,
+        entity::EntityId,
         entity::Entity,
         player,
         player::Player,
         character,
         character::Character,
         scenario,
+        scenario::ScenarioId,
         scenario::Scenario,
+        seq_play,
+        seq_play::SeqPlay
     },
 
     registry::{
@@ -58,7 +62,7 @@ pub use crate::{
 
         turn_state,
         turn_state::{
-            TurnState
+            TurnStatus
         },
 
         turn_count,

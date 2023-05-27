@@ -72,7 +72,6 @@
 ///        .apply( Player::Add(1,"APlayer".to_string()))
 ///         .apply( Character::Add(2,"ACharacter".to_string()));
 ///     `
-
 use crate::prelude::*;
 
 pub type CmdErr = String;
@@ -88,15 +87,10 @@ pub trait Applicable {
 impl<T: Applicable> Applicable for Vec<T> {
     fn apply_to(self, state: State) -> CmdResult<State> {
         self.into_iter()
-            .fold(
-                Ok(state),
-                |state, action| {
-                    match state {
-                        Ok(state) => action.apply_to(state),
-                        Err(action_error) => Err(action_error)
-                    }
-                },
-            )
+            .fold(Ok(state), |state, action| match state {
+                Ok(state) => action.apply_to(state),
+                Err(action_error) => Err(action_error),
+            })
     }
     fn apply_to_default(self) -> CmdResult<State> {
         self.apply_to(State::default())
@@ -111,7 +105,7 @@ impl State {
     /// same type like they do with vec![].apply(). Rust is so lovely. ❤️🦀
     ///
     /// The trait `ApplicableChainable` needs to be exported and imported
-    /// as part of the prelude for this to work.
+    /// as part of the prelude for the chainable result types to work.
     ///
     /// ```
     /// use yourupnext::prelude::*;
@@ -128,12 +122,62 @@ impl State {
     pub fn apply<T: Applicable>(self, command: T) -> CmdResult<State> {
         command.apply_to(self)
     }
+
+    /// Apply changes to state with a set of data for a command
+    ///
+    /// This method accepts a vector of values <T> and a closure that accepts
+    /// one of those values and returns an Applicable. This is done so that we
+    /// can map the data set to the inputs of the command.
+    ///
+    /// The applicable can take 2 forms:
+    ///
+    /// 1 - An enum variant that *impl Applicable,* allowing the system to
+    ///     do MyCommandEnum::Command(values).apply(state) to get a new state
+    ///     or error.
+    ///
+    /// 2 - A closure that accepts a moved state (making it an FnOnce) and
+    ///     returns a new state or error. The system can call a closure that
+    ///     takes a *State* and returns a *CmdResult<State>* the same as it
+    ///     can call *.apply(state)* on an enum variant.
+    ///
+    /// ```
+    /// use yourupnext::prelude::*;
+    /// let state = State::default()
+    ///     .apply_with(
+    ///         vec![100,200,300],
+    ///         |pub_id| Character::Add(pub_id, "Character")
+    ///     ).apply_with(
+    ///         vec![400,500,600],
+    ///         |pub_id| move |state| character::cmd::add(state, pub_id, "Character")
+    ///     );
+    /// assert!(state.is_ok());
+    /// ```
+    pub fn apply_with<T, A: Applicable, F: Fn(T) -> A>(
+        self,
+        items: Vec<T>,
+        applicable_factory: F,
+    ) -> CmdResult<State> {
+        items
+            .into_iter()
+            .fold(
+                Ok(self),
+                |state, item|
+                        match state {
+                            Ok(state) => applicable_factory(item).apply_to(state),
+                            Err(action_error) => Err(action_error),
+        })
+    }
 }
 
 /// Specify a single use trait so that we can add impl blocks to types
 /// defined outside of this crate.
 pub trait ApplicableChainable {
     fn apply<T: Applicable>(self, command: T) -> CmdResult<State>;
+    fn apply_with<T, A: Applicable, F: Fn(T) -> A>(
+        self,
+        items: Vec<T>,
+        make_applicable: F,
+    ) -> CmdResult<State>;
 }
 
 /// Implement our single use trait for orphan implementations
@@ -143,17 +187,37 @@ impl ApplicableChainable for CmdResult<State> {
     fn apply<T: Applicable>(self, command: T) -> CmdResult<State> {
         match self {
             Ok(state) => state.apply(command),
-            Err(_) => self
+            Err(_) => self,
+        }
+    }
+
+    /// ```
+    /// use yourupnext::prelude::*;
+    /// let state = State::default()
+    ///    .apply( Character::Add(100, "ACharacter") )
+    ///    .apply_with(
+    ///        vec![ (200,"BCharacter"), (300, "CCharacter") ],
+    ///         |(pub_id, name)| Character::Add(pub_id, name)
+    ///    );
+    /// assert!(state.is_ok());
+    /// ```
+    fn apply_with<T, A: Applicable, F: Fn(T) -> A>(
+        self,
+        items: Vec<T>,
+        applicable_factory: F,
+    ) -> CmdResult<State> {
+        match self {
+            Ok(state) => state.apply_with(items, applicable_factory),
+            Err(_) => self,
         }
     }
 }
 
-
-/// Implement closures that match the command format as commands
-/// They're not serializable but are useful when creating procesing
-/// pipelines.
-impl <F: FnOnce(State)->CmdResult<State> > Applicable for F {
-
+/// # Command Closure
+/// Allow closures to be used as commands as an `Applicable`,
+/// implementing apply_to() and apply_to_defaut() so that they
+/// work the same as enum variants.
+impl<F: FnOnce(State) -> CmdResult<State>> Applicable for F {
     /// ```
     /// use yourupnext::prelude::*;
     /// let state = State::default()
@@ -167,6 +231,6 @@ impl <F: FnOnce(State)->CmdResult<State> > Applicable for F {
         self(state)
     }
     fn apply_to_default(self) -> CmdResult<State> {
-        self(State::default() )
+        self(State::default())
     }
 }

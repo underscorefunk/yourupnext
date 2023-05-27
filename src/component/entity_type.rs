@@ -44,16 +44,15 @@ pub mod cmd {
     /// let state = entity_type::cmd::classify( state, pub_id, EntityType::Player ).unwrap();
     /// assert_eq!(entity_type::qry::get(&state, pub_id), EntityType::Player);
     /// ```
-    pub fn classify(mut state: State,pub_id: PubId,entity_type: EntityType) -> CmdResult<State> {
+    pub fn classify(mut state: State, pub_id: PubId, entity_type: EntityType) -> CmdResult<State> {
         let id = entity::qry::id(&state, pub_id);
         if entity_type == EntityType::Missing {
-            return Err("Can not manually classify entities as Missing entity type".to_string() );
+            return Err("Can not manually classify entities as Missing entity type".to_string());
         }
         state.entity_type.insert(id, entity_type)?;
         Ok(state)
     }
 }
-
 
 /// ## Entity_Type > Query (qry)
 
@@ -117,7 +116,60 @@ pub mod qry {
         }
         match state.entity_type.get(id) {
             Some(entity_type) => entity_type,
-            _ => EntityType::Generic
+            _ => EntityType::Generic,
         }
+    }
+}
+
+pub mod grd {
+    use super::*;
+
+    /// GUARD > Confirm that an entity is of a specific type or error
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///     .apply( Cmd::AddCharacter(100,"ACharacter"))
+    ///     .unwrap();
+    /// assert!(entity_type::grd::must_be(&state,100,EntityType::Character).is_ok());
+    /// assert!(entity_type::grd::must_be(&state,100,EntityType::Player).is_err());
+    /// ```
+    pub fn must_be(
+        state: &State,
+        pub_id: PubId,
+        required_entity_type: EntityType,
+    ) -> CmdResult<()> {
+        let et = entity_type::qry::get(state, pub_id);
+        if et != required_entity_type {
+            return Err(format!(
+                "Entity type must be {:?}, but found {:?}",
+                required_entity_type, et
+            ));
+        }
+        Ok(())
+    }
+
+    /// GUARD > Confirm that an entity is of a specific type or error
+    /// ```
+    /// use yourupnext::prelude::*;
+    ///
+    /// let state = State::default()
+    ///     .apply( Cmd::AddCharacter(100,"ACharacter"))
+    ///     .unwrap();
+    /// assert!(entity_type::grd::must_not_be(&state,100,EntityType::Character).is_err());
+    /// assert!(entity_type::grd::must_not_be(&state,100,EntityType::Player).is_ok());
+    /// ```
+    pub fn must_not_be(
+        state: &State,
+        pub_id: PubId,
+        disallowed_entity_type: EntityType,
+    ) -> CmdResult<()> {
+        if must_be(state,pub_id, disallowed_entity_type).is_ok() {
+            return Err(format!(
+                "Entity type must not be {:?}",
+                disallowed_entity_type
+            ));
+        }
+        Ok(())
     }
 }

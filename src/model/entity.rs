@@ -13,6 +13,8 @@ use crate::registry;
 /// A simple wrapper for entity commands so that they can be composed together with other pipelines.
 /// `Cmd` is a facade for `cmd` functions.
 
+pub type EntityId = PubId;
+
 #[derive(Debug,Eq,PartialEq)]
 pub enum Entity {
     Add(PubId),

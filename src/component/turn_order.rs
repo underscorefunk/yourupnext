@@ -276,7 +276,7 @@ pub mod qry {
     }
 
     /// QUERY > Get the sequence of Public Ids that expresses the order of turns
-    pub fn sequence(state: &State, scenario_pub_id: PubId) -> TurnOrder {
+    pub fn sequence(state: &State, scenario_pub_id: PubId) -> Vec<PubId> {
         let id = entity::qry::id(state, scenario_pub_id);
         let ids = state.turn_order.get(id).unwrap_or_default();
         entity::qry::pub_ids(state, ids)

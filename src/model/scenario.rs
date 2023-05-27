@@ -24,27 +24,32 @@
 /// - Review hierarchical "assignment" of nested scenarios
 /// - Confirm that another scenario capturing an entity will safely move it
 ///   if required.
+/// - Create query for scenario lineage
+/// - Create nice API for nesting scenarios
 ///
 use crate::prelude::*;
 
+pub type ScenarioId = PubId;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Scenario {
-    // Base scenario
     Add(PubId),
-    Remmove(PubId),
+    Remove(PubId),
     Rename(PubId, &'static Name),
     Describe(PubId, &'static Name),
 
     CaptureEntity(PubId, PubId),
     ReleaseEntity(PubId),
     ReleaseAllEntities(PubId),
+
+    // Nest?
 }
 
 impl Applicable for Scenario {
     fn apply_to(self, state: State) -> CmdResult<State> {
         match self {
             Scenario::Add(pub_id) => cmd::add(state, pub_id),
-            Scenario::Remmove(pub_id) => cmd::remove(state, pub_id),
+            Scenario::Remove(pub_id) => cmd::remove(state, pub_id),
             Scenario::Rename(pub_id, name) => cmd::rename(state, pub_id, name),
             Scenario::Describe(pub_id, description) => cmd::describe(state, pub_id, description),
 
@@ -55,6 +60,14 @@ impl Applicable for Scenario {
                 cmd::release_entity(state, entity_pub_id)
             }
             Scenario::ReleaseAllEntities(pub_id) => cmd::release_all_entities(state, pub_id),
+
+
+            // Scenario::FreePlay(scenario_pub_id) => cmd::free_play(state, scenario_pub_id),
+            // Scenario::SeqPlay(scenario_pub_id) => cmd::seq_play(state, scenario_pub_id),
+
+            // Scenario::AddTurn(scenario_pub_id, entity_pub_id) => cmd::add_turn(state, scenario_pub_id, entity_pub_id),
+            // Scenario::RemoveTurn(entity_pub_id) => cmd::remove_turn(state, entity_pub_id)
+
         }
     }
     fn apply_to_default(self) -> CmdResult<State> {
@@ -82,6 +95,7 @@ pub mod cmd {
         state
             .apply(Entity::Add(scenario_pub_id))
             .apply(Entity::Classify(scenario_pub_id, EntityType::Scenario))
+            .apply(|state| turn_state::cmd::set(state, scenario_pub_id, TurnStatus::Free ) )
     }
 
     /// COMMAND > End a scenario (remove)
@@ -123,7 +137,7 @@ pub mod cmd {
     ///     .apply( Scenario::CaptureEntity(scenario_pub_id,character_pub_id))
     ///     .unwrap();
     ///
-    /// assert_eq!(scenario::qry::find_character(&state,character_pub_id), Some(100));
+    /// assert_eq!(scenario::qry::find_entity(&state,character_pub_id), Some(100));
     ///
     /// ```
     pub fn assign_entity(
@@ -146,7 +160,7 @@ pub mod cmd {
         let character_id = entity::qry::id(&state, character_pub_id);
 
         state
-            .character_scenario
+            .scenario_entity
             .set_parent(character_id, scenario_id)?;
 
         Ok(state)
@@ -164,7 +178,7 @@ pub mod cmd {
     ///     .apply( Character::Add(character_pub_id, "ACharacter") )
     ///     .apply( Scenario::CaptureEntity(scenario_pub_id, character_pub_id) )
     ///     .unwrap();
-    /// assert_eq!(scenario::qry::find_character(&state,character_pub_id), Some(100));
+    /// assert_eq!(scenario::qry::find_entity(&state,character_pub_id), Some(100));
     ///
     /// let state = state
     ///     .apply( Scenario::ReleaseEntity(character_pub_id))
@@ -180,11 +194,11 @@ pub mod cmd {
 
         let character_id = entity::qry::id(&state, character_pub_id);
 
-        if !state.character_scenario.is_child(character_id) {
+        if !state.scenario_entity.is_child(character_id) {
             return Err("Can not release a character from a scenario when the character is not assigned to a scenario.".to_string());
         }
 
-        state.character_scenario.remove_parent(character_id)?;
+        state.scenario_entity.remove_parent(character_id)?;
 
         Ok(state)
     }
@@ -239,9 +253,11 @@ pub mod qry {
     }
 
     /// QUERY > Get a character's `scenario` assignment if any
-    pub fn find_character(state: &State, character_pub_id: PubId) -> Option<PubId> {
-        let character_id = entity::qry::id(state, character_pub_id);
-        let scenario_id = state.character_scenario.parent(character_id).unwrap_or(0);
+    pub fn find_entity(state: &State, entity_pub_id: PubId) -> Option<PubId> {
+        let entity_id = entity::qry::id(state, entity_pub_id);
+        let scenario_id = state.scenario_entity.parent(entity_id).unwrap_or(0);
         entity::qry::pub_id(state, scenario_id)
     }
+
+
 }
