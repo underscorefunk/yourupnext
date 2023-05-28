@@ -4,7 +4,12 @@ pub use crate::{
     state::{
         State,
     },
-
+    error,
+    error:: {
+        Error,
+        cmd_err,
+        qry_err
+    },
     command,
     command::{
         Cmd,
@@ -14,7 +19,14 @@ pub use crate::{
         CmdResult,
         CmdErr,
         Applicable,
-        ApplicableChainable
+        ApplicableChainable,
+        ApplicableWithChainable
+    },
+    queryable::{
+        QueryResult,
+        QueryError,
+        Queryable,
+        ApplicableQueryResult
     },
     model::{
         entity,
@@ -24,6 +36,7 @@ pub use crate::{
         player::PlayerId,
         player::Player,
         character,
+        character::CharacterId,
         character::Character,
         scenario,
         scenario::ScenarioId,

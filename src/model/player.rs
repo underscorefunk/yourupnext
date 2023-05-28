@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 
-/// ## Player > Command Applicables(Cmd)
+/// ## Player > Command Applicables (Cmd)
 /// A simple wrapper for player commands so that they can be composed together with other pipelines.
 /// `Cmd` is a facade for `cmd` functions.
 

@@ -173,12 +173,8 @@ impl State {
 /// defined outside of this crate.
 pub trait ApplicableChainable {
     fn apply<T: Applicable>(self, command: T) -> CmdResult<State>;
-    fn apply_with<T, A: Applicable, F: Fn(T) -> A>(
-        self,
-        items: Vec<T>,
-        make_applicable: F,
-    ) -> CmdResult<State>;
 }
+
 
 /// Implement our single use trait for orphan implementations
 impl ApplicableChainable for CmdResult<State> {
@@ -190,7 +186,19 @@ impl ApplicableChainable for CmdResult<State> {
             Err(_) => self,
         }
     }
+}
 
+
+
+pub trait ApplicableWithChainable {
+    fn apply_with<T, A: Applicable, F: Fn(T) -> A>(
+        self,
+        items: Vec<T>,
+        make_applicable: F,
+    ) -> CmdResult<State>;
+}
+
+impl ApplicableWithChainable for CmdResult<State> {
     /// ```
     /// use yourupnext::prelude::*;
     /// let state = State::default()

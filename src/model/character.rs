@@ -5,14 +5,17 @@ use crate::prelude::*;
 /// ## Character > Command Applicables (Cmd)
 /// A simple wrapper for character commands so that they can be composed together with other pipelines.
 /// `Cmd` is a facade for `cmd` functions.
+
+pub type CharacterId = PubId;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Character {
-    Add(PubId, &'static Name),
-    Remove(PubId),
-    Rename(PubId, &'static Name),
-    AssignPlayer(PubId, PubId),
-    RemovePlayer(PubId),
-    RemovePlayerFromAll(PubId)
+    Add(CharacterId, &'static Name),
+    Remove(CharacterId),
+    Rename(CharacterId, &'static Name),
+    AssignPlayer(CharacterId, PlayerId),
+    RemovePlayer(CharacterId),
+    RemovePlayerFromAll(PlayerId)
 }
 
 impl Applicable for Character {
